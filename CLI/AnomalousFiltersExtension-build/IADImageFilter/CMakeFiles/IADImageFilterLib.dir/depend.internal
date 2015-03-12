@@ -31,7 +31,6 @@ IADImageFilter/CMakeFiles/IADImageFilterLib.dir/IADImageFilter.cxx.o
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkConceptChecking.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkConstNeighborhoodIterator.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkConstNeighborhoodIterator.hxx
- /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkConstSliceIterator.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkContinuousIndex.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkCovariantVector.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkCovariantVector.hxx
@@ -43,8 +42,6 @@ IADImageFilter/CMakeFiles/IADImageFilterLib.dir/IADImageFilter.cxx.o
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkDefaultPixelAccessorFunctor.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkDefaultVectorPixelAccessor.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkDefaultVectorPixelAccessorFunctor.h
- /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkDerivativeOperator.h
- /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkDerivativeOperator.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkDiffusionTensor3D.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkDiffusionTensor3D.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkDomainThreader.h
@@ -64,16 +61,24 @@ IADImageFilter/CMakeFiles/IADImageFilterLib.dir/IADImageFilter.cxx.o
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageBoundaryCondition.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageConstIterator.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageConstIterator.hxx
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageConstIteratorWithIndex.h
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageConstIteratorWithIndex.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageHelper.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageIORegion.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageIterator.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageIterator.hxx
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageIteratorWithIndex.h
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageIteratorWithIndex.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegion.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegion.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionConstIterator.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionConstIterator.hxx
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionConstIteratorWithIndex.h
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionConstIteratorWithIndex.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionIterator.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionIterator.hxx
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionIteratorWithIndex.h
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionIteratorWithIndex.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionSplitterBase.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageScanlineConstIterator.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageScanlineConstIterator.hxx
@@ -87,6 +92,8 @@ IADImageFilter/CMakeFiles/IADImageFilterLib.dir/IADImageFilter.cxx.o
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageTransformHelper.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImportImageContainer.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImportImageContainer.hxx
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkInPlaceImageFilter.h
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkInPlaceImageFilter.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkIndent.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkIndex.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkInputDataObjectIterator.h
@@ -109,10 +116,6 @@ IADImageFilter/CMakeFiles/IADImageFilterLib.dir/IADImageFilter.cxx.o
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkNeighborhood.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkNeighborhoodAccessorFunctor.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkNeighborhoodAllocator.h
- /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkNeighborhoodInnerProduct.h
- /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkNeighborhoodInnerProduct.hxx
- /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkNeighborhoodIterator.h
- /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkNeighborhoodIterator.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkNeighborhoodOperator.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkNeighborhoodOperator.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkNumericTraits.h
@@ -135,6 +138,7 @@ IADImageFilter/CMakeFiles/IADImageFilterLib.dir/IADImageFilter.cxx.o
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkPoint.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkPoint.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkProcessObject.h
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkProgressReporter.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkRGBAPixel.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkRGBAPixel.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkRGBPixel.h
@@ -161,6 +165,8 @@ IADImageFilter/CMakeFiles/IADImageFilterLib.dir/IADImageFilter.cxx.o
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkThreadSupport.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkTimeProbe.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkTimeStamp.h
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkUnaryFunctorImageFilter.h
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkUnaryFunctorImageFilter.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkVariableLengthVector.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkVariableLengthVector.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkVariableSizeMatrix.h
@@ -175,6 +181,8 @@ IADImageFilter/CMakeFiles/IADImageFilterLib.dir/IADImageFilter.cxx.o
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkWindows.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkZeroFluxNeumannBoundaryCondition.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkZeroFluxNeumannBoundaryCondition.hxx
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Filtering/ImageFilterBase/include/itkCastImageFilter.h
+ /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Filtering/ImageFilterBase/include/itkCastImageFilter.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/IO/ImageBase/include/itkConvertPixelBuffer.h
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/IO/ImageBase/include/itkConvertPixelBuffer.hxx
  /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/IO/ImageBase/include/itkImageFileReader.h

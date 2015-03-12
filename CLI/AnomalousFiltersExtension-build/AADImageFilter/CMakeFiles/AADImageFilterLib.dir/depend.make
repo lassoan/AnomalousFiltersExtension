@@ -68,10 +68,6 @@ AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/anto
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageIterator.hxx
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageIteratorWithIndex.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageIteratorWithIndex.hxx
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageLinearConstIteratorWithIndex.h
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageLinearConstIteratorWithIndex.hxx
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageLinearIteratorWithIndex.h
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageLinearIteratorWithIndex.hxx
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegion.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegion.hxx
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionConstIterator.h
@@ -83,7 +79,6 @@ AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/anto
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionIteratorWithIndex.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionIteratorWithIndex.hxx
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionSplitterBase.h
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageRegionSplitterDirection.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageScanlineConstIterator.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageScanlineConstIterator.hxx
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkImageScanlineIterator.h
@@ -142,7 +137,6 @@ AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/anto
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkPoint.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkPoint.hxx
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkProcessObject.h
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkProgressAccumulator.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkProgressReporter.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkRGBAPixel.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkRGBAPixel.hxx
@@ -188,12 +182,6 @@ AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/anto
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Core/Common/include/itkZeroFluxNeumannBoundaryCondition.hxx
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Filtering/ImageFilterBase/include/itkCastImageFilter.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Filtering/ImageFilterBase/include/itkCastImageFilter.hxx
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Filtering/ImageFilterBase/include/itkRecursiveSeparableImageFilter.h
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Filtering/ImageFilterBase/include/itkRecursiveSeparableImageFilter.hxx
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Filtering/Smoothing/include/itkRecursiveGaussianImageFilter.h
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Filtering/Smoothing/include/itkRecursiveGaussianImageFilter.hxx
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Filtering/Smoothing/include/itkSmoothingRecursiveGaussianImageFilter.h
-AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/Filtering/Smoothing/include/itkSmoothingRecursiveGaussianImageFilter.hxx
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/IO/ImageBase/include/itkConvertPixelBuffer.h
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/IO/ImageBase/include/itkConvertPixelBuffer.hxx
 AADImageFilter/CMakeFiles/AADImageFilterLib.dir/AADImageFilter.cxx.o: /home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/ITKv4/Modules/IO/ImageBase/include/itkImageFileReader.h
