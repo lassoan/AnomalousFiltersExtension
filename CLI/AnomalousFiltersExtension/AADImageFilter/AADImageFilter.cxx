@@ -2,6 +2,7 @@
 
 #include "itkSmoothingRecursiveGaussianImageFilter.h"
 #include "AnisotropicAnomalousDiffusionImageFilter.h"
+#include "itkCastImageFilter.h"
 
 #include "itkPluginUtilities.h"
 
@@ -20,7 +21,7 @@ int DoIt( int argc, char * argv[], T )
 {
   PARSE_ARGS;
 
-  typedef    T InputPixelType;
+  typedef    float InputPixelType;
   typedef    T OutputPixelType;
 
   typedef itk::Image<InputPixelType,  3> InputImageType;
@@ -28,16 +29,21 @@ int DoIt( int argc, char * argv[], T )
 
   typedef itk::ImageFileReader<InputImageType>  ReaderType;
   typedef itk::ImageFileWriter<OutputImageType> WriterType;
+  typedef itk::CastImageFilter<InputImageType, OutputImageType> CastType;
 
 //  typedef itk::SmoothingRecursiveGaussianImageFilter<
 //    InputImageType, OutputImageType>  FilterType;
-  typedef itk::AnisotropicAnomalousDiffusionImageFilter<InputImageType, OutputImageType> FilterType;
+  typedef itk::AnisotropicAnomalousDiffusionImageFilter<InputImageType, InputImageType> FilterType;
 
   typename ReaderType::Pointer reader = ReaderType::New();
+  itk::PluginFilterWatcher watchReader(reader, "Read Volume",CLPProcessInformation);
 
   reader->SetFileName( inputVolume.c_str() );
 
   typename FilterType::Pointer filter = FilterType::New();
+  itk::PluginFilterWatcher watchFilter(filter, "Gradient Anisotropic Diffusion",CLPProcessInformation);
+  watchFilter.SimpleFilterWatcher;
+
   filter->SetInput( reader->GetOutput() );
 //  filter->SetSigma( sigma );
   filter->SetIterations(iterations);
@@ -45,9 +51,14 @@ int DoIt( int argc, char * argv[], T )
   filter->SetTimeStep(timeStep);
   filter->SetQ(q);
 
+  typename CastType::Pointer cast = CastType::New();
+  cast->SetInput( filter->GetOutput() );
+
   typename WriterType::Pointer writer = WriterType::New();
+  itk::PluginFilterWatcher watchWriter(writer, "Write Volume",CLPProcessInformation);
+
   writer->SetFileName( outputVolume.c_str() );
-  writer->SetInput( filter->GetOutput() );
+  writer->SetInput( cast->GetOutput() );
   writer->SetUseCompression(1);
   writer->Update();
 

@@ -1,0 +1,14 @@
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/AADImageFilter/CMakeFiles/AADImageFilter.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/AADImageFilter/Testing/Cxx/CMakeFiles/AADImageFilterData.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/AADImageFilter/CMakeFiles/AADImageFilterLib.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/AADImageFilter/Testing/Cxx/CMakeFiles/AADImageFilterTest.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/CMakeFiles/ConfigureAdditionalLauncherSettings.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/CMakeFiles/Experimental.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/CMakeFiles/ExperimentalUpload.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/CMakeFiles/ExperimentalUploadOnly.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/IADImageFilter/CMakeFiles/IADImageFilter.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/IADImageFilter/Testing/Cxx/CMakeFiles/IADImageFilterData.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/IADImageFilter/CMakeFiles/IADImageFilterLib.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/IADImageFilter/Testing/Cxx/CMakeFiles/IADImageFilterTest.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/CMakeFiles/Nightly.dir
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/CMakeFiles/NightlyUpload.dir

@@ -1,0 +1,4 @@
+# Target labels
+ AADImageFilter
+# Source files and their labels
+/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension/AADImageFilter/Testing/Cxx/AADImageFilterTest.cxx
