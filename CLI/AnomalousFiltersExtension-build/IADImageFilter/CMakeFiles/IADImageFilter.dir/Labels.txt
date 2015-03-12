@@ -1,4 +1,0 @@
-# Target labels
- IADImageFilter
-# Source files and their labels
-/home/antonio/Slicer-Git/Slicer-SuperBuild-Debug/Slicer-build/Base/CLI/SEMCommandLineLibraryWrapper.cxx

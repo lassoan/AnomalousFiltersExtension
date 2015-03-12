@@ -1,4 +1,0 @@
-# Target labels
- IADImageFilter
-# Source files and their labels
-/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension/IADImageFilter/Testing/Cxx/IADImageFilterTest.cxx

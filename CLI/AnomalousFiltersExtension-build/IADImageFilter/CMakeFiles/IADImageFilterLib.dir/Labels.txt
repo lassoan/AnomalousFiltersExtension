@@ -1,6 +1,0 @@
-# Target labels
- IADImageFilter
-# Source files and their labels
-/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/IADImageFilter/IADImageFilterCLP.h
-/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension/IADImageFilter/IADImageFilter.cxx
-/home/antonio/Documents/CSIM-Toolkits/Slicer/CLI/AnomalousFiltersExtension-build/IADImageFilter/IADImageFilterCLP.h.rule
