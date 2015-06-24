@@ -1,5 +1,8 @@
 #include "itkImageFileWriter.h"
 
+//Brain extraction pipeline
+#include "BrainExtraction/BrainExtractionTool.h"
+
 //Filtering Methods
 #include "AnisotropicAnomalousDiffusionImageFilter.h"
 
@@ -39,37 +42,89 @@ int DoIt( int argc, char * argv[], T )
   typedef itk::ImageFileReader<InputImageType>  ReaderType;
   typedef itk::ImageFileWriter<OutputImageType> WriterType;
 
+  //Create the temporary directory for the intermediated images
+  std::stringstream cmdMkdir;
+  cmdMkdir<<"mkdir "<<outputFolder.c_str();
+  system(cmdMkdir.str().c_str());
+
   //Read the input volumes
   typename ReaderType::Pointer readerT1 = ReaderType::New();
+  typename ReaderType::Pointer readerT1Gd = ReaderType::New();
   typename ReaderType::Pointer readerFLAIR = ReaderType::New();
   typename ReaderType::Pointer readerFA = ReaderType::New();
-  itk::PluginFilterWatcher watchReader(readerT1, "Read Volume", CLPProcessInformation);
-//watchReader.ShowProgress();
+  itk::PluginFilterWatcher watchReader(readerT1, "Read T1 Volume", CLPProcessInformation, .5, 0.0);
   readerT1->SetFileName( t1Volume.c_str() );
+  readerT1Gd->SetFileName( t1GdVolume.c_str() );
   readerFLAIR->SetFileName(FLAIRVolume.c_str());
   readerFA->SetFileName(FAVolume.c_str());
 
-  //Image filtering process for all the images
-  typedef itk::AnisotropicAnomalousDiffusionImageFilter<InputImageType, InputImageType>  FilterType;
-  typename FilterType::Pointer filter = FilterType::New();
-  //TODO: Put status here - filtering T1 image
-  filter->SetInput( readerT1->GetOutput() );
-  filter->SetQ(q);
-  filter->SetIterations(iterations);
-  filter->SetCondutance(condutance);
-  filter->SetTimeStep(timeStep);
+  typename CastType::Pointer caster = CastType::New();
+  typename WriterType::Pointer writer = WriterType::New();
+  //T1
+  std::stringstream saveTmpPathT1;
+  saveTmpPathT1<<outputFolder.c_str()<<"/t1Volume.nii";
+  writer->SetFileName(saveTmpPathT1.str());
+  caster->SetInput(readerT1->GetOutput());
+  writer->SetInput(caster->GetOutput());
+  writer->Update();
+  //T1-Gd
+  std::stringstream saveTmpPathT1Gd;
+  saveTmpPathT1Gd<<outputFolder.c_str()<<"/t1GdVolume.nii";
+  writer->SetFileName(saveTmpPathT1Gd.str());
+  caster->SetInput(readerT1Gd->GetOutput());
+  writer->SetInput(caster->GetOutput());
+  writer->Update();
+  //T2-FLAIR
+  std::stringstream saveTmpPathFLAIR;
+  saveTmpPathFLAIR<<outputFolder.c_str()<<"/FLAIRVolume.nii";
+  writer->SetFileName(saveTmpPathFLAIR.str());
+  caster->SetInput(readerFLAIR->GetOutput());
+  writer->SetInput(caster->GetOutput());
+  writer->Update();
+  //DTI-FA
+  std::stringstream saveTmpPathFA;
+  saveTmpPathFA<<outputFolder.c_str()<<"/FAVolume.nii";
+  writer->SetFileName(saveTmpPathFA.str());
+  caster->SetInput(readerFA->GetOutput());
+  writer->SetInput(caster->GetOutput());
+  writer->Update();
 
-  //Multimodal image registering process
+  //Brain extraction - FSL
+    BrainExtraction bet(outputFolder.c_str());
+    bet.setF(valueF);
+    bet.setG(valueG);
+    bet.isOptionB(optionB);
+
+    bet.runBET(BrainExtraction::T1);
+    bet.runBET(BrainExtraction::T1GD);
+    bet.runBET(BrainExtraction::FLAIR);
+    bet.runBET(BrainExtraction::FA);
+
+ //Multimodal image registering process
+
+
+  //Image filtering process for all the images
+//  typedef itk::AnisotropicAnomalousDiffusionImageFilter<InputImageType, InputImageType>  FilterType;
+//  typename FilterType::Pointer filter = FilterType::New();
+//        itk::PluginFilterWatcher watchFilter(filter, "AAD filtering on T1 Volume", CLPProcessInformation);
+  //TODO: Put status here - filtering T1 image
+//  filter->SetInput( readerT1->GetOutput() );
+  //filter->SetQ(q);
+  //filter->SetIterations(iterations);
+  //filter->SetCondutance(condutance);
+  //filter->SetTimeStep(timeStep);
+
+
 
   //Converting the pixel data to output type
-  typename CastType::Pointer cast = CastType::New();
-  cast->SetInput( filter->GetOutput() );
+  //typename CastType::Pointer cast = CastType::New();
+  //cast->SetInput( filter->GetOutput() );
 
-  typename WriterType::Pointer writer = WriterType::New();
-  writer->SetFileName( outputVolume.c_str() );
-  writer->SetInput( cast->GetOutput() );
-  writer->SetUseCompression(1);
-  writer->Update();
+  //typename WriterType::Pointer writer = WriterType::New();
+  //writer->SetFileName( outputVolume.c_str() );
+  //writer->SetInput( cast->GetOutput() );
+  //writer->SetUseCompression(1);
+  //writer->Update();
 
   return EXIT_SUCCESS;
 }

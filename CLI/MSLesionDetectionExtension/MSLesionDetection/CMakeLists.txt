@@ -40,6 +40,10 @@ SEMMacroBuildCLI(
   ADDITIONAL_SRCS ${MODULE_SRCS}
 AnisotropicAnomalousDiffusionImageFilter.hxx
 AnisotropicAnomalousDiffusionImageFilter.h
+BrainExtraction/BrainExtractionTool.h
+BrainExtraction/BrainExtractionTool.cxx
+Registration/MultimodalityRegistration.h
+Registration/MultimodalityRegistration.cxx
   )
 
 #-----------------------------------------------------------------------------

@@ -9,104 +9,203 @@
 <contributor>FirstName LastName (Institution), FirstName LastName (Institution)</contributor>
 <acknowledgements>This work was partially funded by NIH grant NXNNXXNNNNNN-NNXN</acknowledgements>
    <parameters>
+	<directory>
+	   <name>outputFolder</name>
+	   <longflag>--outputFolder</longflag>
+	   <label>Output folder</label>
+	   <default>./</default>
+	   <description>![CDATA[Output all images used for MS segmentation process.]]</description>
+	</directory>
 	<label>IO</label>
-	<description><![CDATA[Input/output parameters]]></description>
+	   <description><![CDATA[Input/output parameters]]></description>
 	<image>
-	<name>t1Volume</name>
-	<label>T1w Volume</label>
-	<channel>input</channel>
-	<index>0</index>
-	<description><![CDATA[T1 Input volume]]></description>
+	   <name>t1Volume</name>
+	   <label>T1w Volume</label>
+	   <channel>input</channel>
+	   <index>0</index>
+	   <description><![CDATA[T1 Input volume]]></description>
+	</image>
+        <image>
+	   <name>t1GdVolume</name>
+	   <label>T1-Gdw Volume</label>
+	   <channel>input</channel>
+	   <index>1</index>
+	   <description><![CDATA[T1-Gd Input volume]]></description>
 	</image>
 	<image>
-	<name>FLAIRVolume</name>
-	<label>T2 FLAIR Volume</label>
-	<channel>input</channel>
-	<index>1</index>
-	<description><![CDATA[T2 FLAIR Input volume]]></description>
+	   <name>FLAIRVolume</name>
+	   <label>T2 FLAIR Volume</label>
+	   <channel>input</channel>
+	   <index>2</index>
+	   <description><![CDATA[T2 FLAIR Input volume]]></description>
 	</image>
 	<image>
-	<name>FAVolume</name>
-	<label>DTI-FA Volume</label>
-	<channel>input</channel>
-	<index>2</index>
-	<description><![CDATA[DTI-FA Input Volume]]></description>
+	   <name>FAVolume</name>
+	   <label>DTI-FA Volume</label>
+	   <channel>input</channel>
+	   <index>3</index>
+	   <description><![CDATA[DTI-FA Input Volume]]></description>
 	</image>
 	<image>
-	<name>outputVolume</name>
-	<label>Output Volume</label>
-	<channel>output</channel>
-	<index>3</index>
-	<description><![CDATA[Output Volume]]></description>
+	   <name>outputVolume</name>
+	   <label>Output Volume</label>
+	   <channel>output</channel>
+	   <index>4</index>
+	   <description><![CDATA[Output Volume]]></description>
 	</image>
    </parameters>
-   <parameters advanced="true">		
-	<label>T1w Volume Filtering Parameters Set</label>
-	<description><![CDATA[Image filtering parameters]]></description>
-	<double>
-	<name>condutance</name>
-	<longflag>--condutance</longflag>
-	<flag>c</flag>
-	<label>Condutance</label>
-	<description><![CDATA[A integer value for edge preservation adjustment.]]></description>
-	<default>5</default>
-	<constraints>
-	<minimum>0</minimum>
-	<maximum>10</maximum>
-	<step>0.01</step>
-	</constraints>
+
+
+
+   <parameters advanced="true">
+      <label>Brain Extraction Parameter Set</label>
+      <description><![CDATA[Brain extraction pipeline parameters. OBS: This method uses FSL 5.0 (BET) toolkit]]></description>
+      <double>
+	   <name>valueF</name>
+	   <longflag>--BETf</longflag>
+	   <flag>f</flag>
+	   <label>Fractional Level</label>
+	   <description><![CDATA[A double value for brain volume estimative (0->1)]]></description>
+	   <default>0.1</default>
+	   <constraints>
+	   <minimum>0.0</minimum>
+	   <maximum>1.0</maximum>
+	   <step>0.01</step>
+	   </constraints>
 	</double>
-	<integer>
-	<name>iterations</name>
-	<longflag>--iterations</longflag>
-	<flag>i</flag>
-	<label>Number of Iterations</label>
-	<description><![CDATA[A integer value that defines the number of iterations.]]></description>
-	<default>1</default>
-	<constraints>
-	<minimum>1</minimum>
-	<maximum>50</maximum>
-	<step>1</step>
-	</constraints>
-	</integer>
-	<double>
-	<name>timeStep</name>
-	<longflag>--timestep</longflag>
-	<flag>t</flag>
-	<label>Time Step</label>
-	<description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to 		maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See 			GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
-	<default>0.0625</default>
-	<constraints>
-	<minimum>0.0015</minimum>
-	<maximum>0.0625</maximum>
-	<step>0.001</step>
-	</constraints>
+        <double>
+	   <name>valueG</name>
+	   <longflag>--BETg</longflag>
+	   <flag>g</flag>
+	   <label>Gradient in fractional intensity</label>
+	   <description><![CDATA[Vertical gradient in fractional intensity threshold (-1->1)]]></description>
+	   <default>0.0</default>
+	   <constraints>
+	   <minimum>-1.0</minimum>
+	   <maximum>1.0</maximum>
+	   <step>0.01</step>
+	   </constraints>
 	</double>
-	<double>
-	<name>q</name>
-	<longflag>--anomalousparameter</longflag>
-	<flag>q</flag>
-	<label>Anomalous Parameter</label>
-	<description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is 	convoluated in each neighborhood in the image.]]></description>
-	<default>1.0</default>
-	<constraints>
-	<minimum>0.0</minimum>
-	<maximum>2.0</maximum>
-	<step>0.01</step>
-	</constraints>
-	</double>
+        <boolean>
+	      <name>optionB</name>
+	      <longflag>--optionB</longflag>
+	      <description><![CDATA[This attempts to reduce image bias, and residual neck voxels]]></description>
+	      <label>Bias and Neck removal</label>
+	      <default>true</default>
+	</boolean>
    </parameters>
-   <parameters>
+
+
+
+
+   <parameters advanced="true">
 	<label>Registration Set</label>
 	<description><![CDATA[Image registering parameters]]></description>
 	<string-enumeration>
-	<name>RegisterType</name>
-	<longflag>registerType</longflag>
-	<label>Skeleton type</label>
-	<description><![CDATA[Type of skeleton to create]]></description>
-	<default>Affine</default>
-	<element>Affine</element>
-	<element>Rigid3D (6 DOF)</element>
+	   <name>register1Type</name>
+	   <longflag>register1Type</longflag>
+	   <label>First Step Registration</label>
+	   <description><![CDATA[]]></description>
+	   <default>Affine</default>
+	   <element>Affine</element>
+	   <element>Rigid3D (6 DOF)</element>
+	</string-enumeration>
+	<string-enumeration>
+	   <name>register2Type</name>
+	   <longflag>register2Type</longflag>
+	   <label>Second Step Registration</label>
+	   <description><![CDATA[]]></description>
+	   <default>Rigid3D (6 DOF)</default>
+	   <element>Affine</element>
+	   <element>Rigid3D (6 DOF)</element>
+	</string-enumeration>
+        <string-enumeration>
+	   <name>interpolationMethod</name>
+	   <longflag>interMethod</longflag>
+	   <label>Interpolation method</label>
+	   <description><![CDATA[Interpolation method to be applied over all image modalities]]></description>
+	   <default>Linear</default>
+	   <element>Linear</element>
+	   <element>B-Spline</element>
+	   <element>Nearest Neighbor</element>
+	</string-enumeration>
+        <string-enumeration>
+	   <name>metricMethod</name>
+	   <longflag>metricMethod</longflag>
+	   <label>Metric Method</label>
+	   <description><![CDATA[Metric method to be applied over all image modalities]]></description>
+	   <default>Mutual Information</default>
+	   <element>Mutual Information</element>
+	   <element>Crossed Correlation</element>
+	</string-enumeration>
+        <string-enumeration>
+	   <name>optimizationMethod</name>
+	   <longflag>optmMethod</longflag>
+	   <label>Optimization Method</label>
+	   <description><![CDATA[Optimization method to be applied over all image modalities]]></description>
+	   <default>Gradient Descendent</default>
+	   <element>Gradient Descendent</element>
+	   <element>Other ...</element>
 	</string-enumeration>
    </parameters>
+
+
+
+   <parameters advanced="true">	
+	<label>T1w Volume Filtering Parameters Set</label>
+	<description><![CDATA[Image filtering parameters specific for T1w image modality]]></description>
+	<double>
+	   <name>condutance</name>
+	   <longflag>--condutance</longflag>
+	   <flag>c</flag>
+	   <label>Condutance</label>
+	   <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
+	   <default>5</default>
+	   <constraints>
+	   <minimum>0</minimum>
+	   <maximum>10</maximum>
+	   <step>0.01</step>
+	   </constraints>
+	</double>
+	<integer>
+	   <name>iterations</name>
+	   <longflag>--iterations</longflag>
+	   <flag>i</flag>
+	   <label>Number of Iterations</label>
+	   <description><![CDATA[A integer value that defines the number of iterations.]]></description>
+	   <default>1</default>
+	   <constraints>
+	   <minimum>1</minimum>
+	   <maximum>50</maximum>
+	   <step>1</step>
+	   </constraints>
+	   </integer>
+	<double>
+	   <name>timeStep</name>
+	   <longflag>--timestep</longflag>
+	   <flag>t</flag>
+	   <label>Time Step</label>
+	   <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See 			GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
+	   <default>0.0625</default>
+	   <constraints>
+	   <minimum>0.0015</minimum>
+	   <maximum>0.0625</maximum>
+	   <step>0.001</step>
+	   </constraints>
+	</double>
+	<double>
+	   <name>q</name>
+	   <longflag>--anomalousparameter</longflag>
+	   <flag>q</flag>
+	   <label>Anomalous Parameter</label>
+	   <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
+	   <default>1.0</default>
+	   <constraints>
+	   <minimum>0.0</minimum>
+	   <maximum>2.0</maximum>
+	   <step>0.01</step>
+	   </constraints>
+	</double>
+   </parameters>   
+   
 </executable>
