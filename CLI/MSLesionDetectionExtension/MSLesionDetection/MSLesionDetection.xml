@@ -95,9 +95,6 @@
 	</boolean>
    </parameters>
 
-
-
-
    <parameters advanced="true">
 	<label>Registration Set</label>
 	<description><![CDATA[Image registering parameters]]></description>
@@ -149,14 +146,12 @@
 	</string-enumeration>
    </parameters>
 
-
-
    <parameters advanced="true">	
 	<label>T1w Volume Filtering Parameters Set</label>
 	<description><![CDATA[Image filtering parameters specific for T1w image modality]]></description>
 	<double>
-	   <name>condutance</name>
-	   <longflag>--condutance</longflag>
+	   <name>condutanceT1</name>
+	   <longflag>--condutanceT1</longflag>
 	   <flag>c</flag>
 	   <label>Condutance</label>
 	   <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
@@ -168,12 +163,12 @@
 	   </constraints>
 	</double>
 	<integer>
-	   <name>iterations</name>
-	   <longflag>--iterations</longflag>
+	   <name>iterationsT1</name>
+	   <longflag>--iterationsT1</longflag>
 	   <flag>i</flag>
 	   <label>Number of Iterations</label>
 	   <description><![CDATA[A integer value that defines the number of iterations.]]></description>
-	   <default>1</default>
+	   <default>5</default>
 	   <constraints>
 	   <minimum>1</minimum>
 	   <maximum>50</maximum>
@@ -181,8 +176,8 @@
 	   </constraints>
 	   </integer>
 	<double>
-	   <name>timeStep</name>
-	   <longflag>--timestep</longflag>
+	   <name>timeStepT1</name>
+	   <longflag>--timestepT1</longflag>
 	   <flag>t</flag>
 	   <label>Time Step</label>
 	   <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See 			GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
@@ -194,18 +189,188 @@
 	   </constraints>
 	</double>
 	<double>
-	   <name>q</name>
-	   <longflag>--anomalousparameter</longflag>
+	   <name>qT1</name>
+	   <longflag>--qT1</longflag>
 	   <flag>q</flag>
 	   <label>Anomalous Parameter</label>
 	   <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
-	   <default>1.0</default>
+	   <default>1.20</default>
 	   <constraints>
 	   <minimum>0.0</minimum>
 	   <maximum>2.0</maximum>
 	   <step>0.01</step>
 	   </constraints>
 	</double>
-   </parameters>   
+   </parameters>  
    
+   <parameters advanced="true">	
+	<label>T1-Gdw Volume Filtering Parameters Set</label>
+	<description><![CDATA[Image filtering parameters specific for T1-Gdw image modality]]></description>
+	<double>
+	   <name>condutanceT1Gd</name>
+	   <longflag>--condutanceT1Gd</longflag>
+	   <flag>c</flag>
+	   <label>Condutance</label>
+	   <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
+	   <default>5</default>
+	   <constraints>
+	   <minimum>0</minimum>
+	   <maximum>10</maximum>
+	   <step>0.01</step>
+	   </constraints>
+	</double>
+	<integer>
+	   <name>iterationsT1Gd</name>
+	   <longflag>--iterationsT1Gd</longflag>
+	   <flag>i</flag>
+	   <label>Number of Iterations</label>
+	   <description><![CDATA[A integer value that defines the number of iterations.]]></description>
+	   <default>5</default>
+	   <constraints>
+	   <minimum>1</minimum>
+	   <maximum>50</maximum>
+	   <step>1</step>
+	   </constraints>
+	   </integer>
+	<double>
+	   <name>timeStepT1Gd</name>
+	   <longflag>--timestepT1Gd</longflag>
+	   <flag>t</flag>
+	   <label>Time Step</label>
+	   <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
+	   <default>0.0625</default>
+	   <constraints>
+	   <minimum>0.0015</minimum>
+	   <maximum>0.0625</maximum>
+	   <step>0.001</step>
+	   </constraints>
+	</double>
+	<double>
+	   <name>qT1Gd</name>
+	   <longflag>--qT1Gd</longflag>
+	   <flag>q</flag>
+	   <label>Anomalous Parameter</label>
+	   <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
+	   <default>1.25</default>
+	   <constraints>
+	   <minimum>0.0</minimum>
+	   <maximum>2.0</maximum>
+	   <step>0.01</step>
+	   </constraints>
+	</double>
+   </parameters> 
+
+  <parameters advanced="true">	
+	<label>FLAIR Volume Filtering Parameters Set</label>
+	<description><![CDATA[Image filtering parameters specific for FLAIR image modality]]></description>
+	<double>
+	   <name>condutanceFLAIR</name>
+	   <longflag>--condutanceFLAIR</longflag>
+	   <flag>c</flag>
+	   <label>Condutance</label>
+	   <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
+	   <default>5</default>
+	   <constraints>
+	   <minimum>0</minimum>
+	   <maximum>10</maximum>
+	   <step>0.01</step>
+	   </constraints>
+	</double>
+	<integer>
+	   <name>iterationsFLAIR</name>
+	   <longflag>--iterationsFLAIR</longflag>
+	   <flag>i</flag>
+	   <label>Number of Iterations</label>
+	   <description><![CDATA[A integer value that defines the number of iterations.]]></description>
+	   <default>6</default>
+	   <constraints>
+	   <minimum>1</minimum>
+	   <maximum>50</maximum>
+	   <step>1</step>
+	   </constraints>
+	   </integer>
+	<double>
+	   <name>timeStepFLAIR</name>
+	   <longflag>--timestepFLAIR</longflag>
+	   <flag>t</flag>
+	   <label>Time Step</label>
+	   <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See 			GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
+	   <default>0.0625</default>
+	   <constraints>
+	   <minimum>0.0015</minimum>
+	   <maximum>0.0625</maximum>
+	   <step>0.001</step>
+	   </constraints>
+	</double>
+	<double>
+	   <name>qFLAIR</name>
+	   <longflag>--qFLAIR</longflag>
+	   <flag>q</flag>
+	   <label>Anomalous Parameter</label>
+	   <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
+	   <default>1.20</default>
+	   <constraints>
+	   <minimum>0.0</minimum>
+	   <maximum>2.0</maximum>
+	   <step>0.01</step>
+	   </constraints>
+	</double>
+   </parameters> 
+
+<parameters advanced="true">	
+	<label>DTI-FA Map Volume Filtering Parameters Set</label>
+	<description><![CDATA[Image filtering parameters specific for DTI-FA image modality]]></description>
+	<double>
+	   <name>condutanceFA</name>
+	   <longflag>--condutanceFA</longflag>
+	   <flag>c</flag>
+	   <label>Condutance</label>
+	   <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
+	   <default>5</default>
+	   <constraints>
+	   <minimum>0</minimum>
+	   <maximum>10</maximum>
+	   <step>0.01</step>
+	   </constraints>
+	</double>
+	<integer>
+	   <name>iterationsFA</name>
+	   <longflag>--iterationsFA</longflag>
+	   <flag>i</flag>
+	   <label>Number of Iterations</label>
+	   <description><![CDATA[A integer value that defines the number of iterations.]]></description>
+	   <default>5</default>
+	   <constraints>
+	   <minimum>1</minimum>
+	   <maximum>50</maximum>
+	   <step>1</step>
+	   </constraints>
+	   </integer>
+	<double>
+	   <name>timeStepFA</name>
+	   <longflag>--timestepFA</longflag>
+	   <flag>t</flag>
+	   <label>Time Step</label>
+	   <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See 			GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
+	   <default>0.0625</default>
+	   <constraints>
+	   <minimum>0.0015</minimum>
+	   <maximum>0.0625</maximum>
+	   <step>0.001</step>
+	   </constraints>
+	</double>
+	<double>
+	   <name>qFA</name>
+	   <longflag>--qFA</longflag>
+	   <flag>q</flag>
+	   <label>Anomalous Parameter</label>
+	   <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
+	   <default>0.5</default>
+	   <constraints>
+	   <minimum>0.0</minimum>
+	   <maximum>2.0</maximum>
+	   <step>0.01</step>
+	   </constraints>
+	</double>
+   </parameters> 
 </executable>
