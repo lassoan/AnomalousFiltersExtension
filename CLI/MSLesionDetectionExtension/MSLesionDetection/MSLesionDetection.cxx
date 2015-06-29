@@ -7,7 +7,7 @@
 #include "AnisotropicAnomalousDiffusionImageFilter.h"
 
 //Registering Methods
-#include "itkAffineTransform.h"
+#include "Registration/MultimodalityRegistration.h"
 
 //Segmentation Methods
 
@@ -52,7 +52,7 @@ int DoIt( int argc, char * argv[], T )
     typename ReaderType::Pointer readerT1Gd = ReaderType::New();
     typename ReaderType::Pointer readerFLAIR = ReaderType::New();
     typename ReaderType::Pointer readerFA = ReaderType::New();
-    itk::PluginFilterWatcher watchReader(readerT1, "Read T1 Volume", CLPProcessInformation, .5, 0.0);
+    itk::PluginFilterWatcher watchReader(readerT1, "Read T1 Volume", CLPProcessInformation);
     readerT1->SetFileName( t1Volume.c_str() );
     readerT1Gd->SetFileName( t1GdVolume.c_str() );
     readerFLAIR->SetFileName(FLAIRVolume.c_str());
@@ -89,8 +89,8 @@ int DoIt( int argc, char * argv[], T )
     writer->SetInput(caster->GetOutput());
     writer->Update();
 
-    //TODO: Mudar comentarios para rodar o comando system com o path!
-    //Brain extraction - FSL
+    //TODO: Trocar brain extraction para Freesurfer ... mri_watershed e mri_nu_correct (bias correction)
+    //Brain extraction - Freesurfer
     BrainExtraction bet(outputFolder.c_str());
     bet.setF(valueF);
     bet.setG(valueG);
@@ -102,7 +102,7 @@ int DoIt( int argc, char * argv[], T )
     bet.runBET(BrainExtraction::FA);
 
     //Multimodal image registering process
-    //TODO: Ver sobre CLI BRAINFit para coregistro ... dentro do Slicer
+
 
     //Image filtering process for all the images
     //  typedef itk::AnisotropicAnomalousDiffusionImageFilter<InputImageType, InputImageType>  FilterType;
@@ -113,7 +113,7 @@ int DoIt( int argc, char * argv[], T )
     //filter->SetQ(q);
     //filter->SetIterations(iterations);
     //filter->SetCondutance(condutance);
-    //filter->SetTimeStep(timeStep);
+    //filter->SetTimeStep(timeStep);s
 
 
 

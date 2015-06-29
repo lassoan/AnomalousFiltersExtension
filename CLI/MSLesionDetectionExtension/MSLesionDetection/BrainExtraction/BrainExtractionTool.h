@@ -12,7 +12,8 @@ using namespace std;
  *
  */
 
-class BrainExtraction{
+class BrainExtraction
+{
 private:
     double f; //fractional level
     double g; //gradient intensity
