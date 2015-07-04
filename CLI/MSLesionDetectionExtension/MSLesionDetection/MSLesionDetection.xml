@@ -3,11 +3,11 @@
 <category>Examples</category>
 <title>MSLesionDetection</title>
 <description><![CDATA[This is a CLI module that can be bundled in an extension]]></description>
-<version>0.0.1</version>
+<version>1.0.0</version>
 <documentation-url>http://www.example.com/Slicer/Modules/MSLesionDetection</documentation-url>
 <license>Slicer</license>
-<contributor>FirstName LastName (Institution), FirstName LastName (Institution)</contributor>
-<acknowledgements>This work was partially funded by NIH grant NXNNXXNNNNNN-NNXN</acknowledgements>
+<contributor>Antonio Carlos Senra Filho (University of Sao Paulo), Luiz Otavio Murta Junior (University of Sao Paulo)</contributor>
+<acknowledgements>This work was partially funded by CAPES and CNPq</acknowledgements>
    <parameters>
 	<directory>
 	   <name>outputFolder</name>
@@ -55,12 +55,58 @@
 	</image>
    </parameters>
 
-
-
-   <parameters advanced="true">
+<parameters advanced="true">
       <label>Brain Extraction Parameter Set</label>
-      <description><![CDATA[Brain extraction pipeline parameters. OBS: This method uses FSL 5.0 (BET) toolkit]]></description>
-      <double>
+      <description><![CDATA[Brain extraction pipeline parameters. OBS: This method uses both FSL 5.0 (BET) toolkit and Freesurfer watershed algorithm. Choose which one is the most appropriated method for your data.]]></description>
+ 	<string-enumeration>
+	      <name>skullStripMethodT1</name>
+	      <longflag>--skullStripT1</longflag>
+	      <description><![CDATA[Choose the method that performs the better skull stripping in your data]]></description>
+	      <label>Brain extraction for T1w</label>
+	      <default>Fs-watershed</default>
+	      <element>Fs-watershed</element>
+	      <element>FSL-BET</element>
+	</string-enumeration>
+<string-enumeration>
+	      <name>skullStripMethodT1Gd</name>
+	      <longflag>--skullStripT1GD</longflag>
+	      <description><![CDATA[Choose the method that performs the better skull stripping in your data]]></description>
+	      <label>Brain extraction for T1-Gdw</label>
+	      <default>FSL-BET</default>
+	      <element>Fs-watershed</element>
+	      <element>FSL-BET</element>
+	</string-enumeration>
+<string-enumeration>
+	      <name>skullStripMethodFLAIR</name>
+	      <longflag>--skullStripFLAIR</longflag>
+	      <description><![CDATA[Choose the method that performs the better skull stripping in your data]]></description>
+	      <label>Brain extraction for FLAIR</label>
+	      <default>Fs-watershed</default>
+	      <element>Fs-watershed</element>
+	      <element>FSL-BET</element>
+	</string-enumeration>	
+<string-enumeration>
+	      <name>skullStripMethodFA</name>
+	      <longflag>--skullStripFA</longflag>
+	      <description><![CDATA[Choose the method that performs the better skull stripping in your data]]></description>
+	      <label>Brain extraction for DTI-FA map</label>
+	      <default>Fs-watershed</default>
+	      <element>Fs-watershed</element>
+	      <element>FSL-BET</element>
+	</string-enumeration>	
+	<integer>
+	   <name>preFlooding</name>
+	   <longflag>--preFlooding</longflag>
+	   <label>Pre Flooding (h)</label>
+	   <description><![CDATA[Freesurfer Parameter: Regulates the watershed intensity over the skull estimation. Higher percentage values give a more agressive algorithm, i.e. the skull is over estimated.]]></description>
+	   <default>25</default>
+	   <constraints>
+	   <minimum>0</minimum>
+	   <maximum>100</maximum>
+	   <step>1</step>
+	   </constraints>
+	</integer> 	
+        <double>
 	   <name>valueF</name>
 	   <longflag>--BETf</longflag>
 	   <flag>f</flag>
@@ -95,64 +141,85 @@
 	</boolean>
    </parameters>
 
-   <parameters advanced="true">
-	<label>Registration Set</label>
+ <parameters>
+<label>Registration Set</label>
 	<description><![CDATA[Image registering parameters]]></description>
-	<string-enumeration>
-	   <name>register1Type</name>
-	   <longflag>register1Type</longflag>
-	   <label>First Step Registration</label>
-	   <description><![CDATA[]]></description>
-	   <default>Affine</default>
-	   <element>Affine</element>
-	   <element>Rigid3D (6 DOF)</element>
-	</string-enumeration>
-	<string-enumeration>
-	   <name>register2Type</name>
-	   <longflag>register2Type</longflag>
-	   <label>Second Step Registration</label>
-	   <description><![CDATA[]]></description>
-	   <default>Rigid3D (6 DOF)</default>
-	   <element>Affine</element>
-	   <element>Rigid3D (6 DOF)</element>
-	</string-enumeration>
-        <string-enumeration>
-	   <name>interpolationMethod</name>
-	   <longflag>interMethod</longflag>
-	   <label>Interpolation method</label>
-	   <description><![CDATA[Interpolation method to be applied over all image modalities]]></description>
-	   <default>Linear</default>
-	   <element>Linear</element>
-	   <element>B-Spline</element>
-	   <element>Nearest Neighbor</element>
-	</string-enumeration>
-        <string-enumeration>
-	   <name>metricMethod</name>
-	   <longflag>metricMethod</longflag>
-	   <label>Metric Method</label>
-	   <description><![CDATA[Metric method to be applied over all image modalities]]></description>
-	   <default>Mutual Information</default>
-	   <element>Mutual Information</element>
-	   <element>Crossed Correlation</element>
-	</string-enumeration>
-        <string-enumeration>
-	   <name>optimizationMethod</name>
-	   <longflag>optmMethod</longflag>
-	   <label>Optimization Method</label>
-	   <description><![CDATA[Optimization method to be applied over all image modalities]]></description>
-	   <default>Gradient Descendent</default>
-	   <element>Gradient Descendent</element>
-	   <element>Other ...</element>
-	</string-enumeration>
+	<image>
+	   <name>fixedVolume</name>
+	   <label>Fixed Volume</label>
+	   <channel>input</channel>
+	   <index>5</index>
+	   <description><![CDATA[Fixed volume used to align the others selected images (usually an brain image atlas)]]></description>
+	</image>
+<double>
+	   <name>nSamples</name>
+	   <longflag>--samples</longflag>
+	   <label>Percentage of Samples</label>
+	   <description><![CDATA[A value (0.0 - 1.0) that defines how much points are needed to sample in the fixed image to obtain registration landmarks. Usually 1% to low detail images and 20% for high detail images.]]></description>
+	   <default>0.02</default>
+	   <constraints>
+	   <minimum>0</minimum>
+	   <maximum>1</maximum>
+	   <step>0.01</step>
+	   </constraints>
+	</double>
+	<double>
+	   <name>learnRate</name>
+	   <longflag>--lrate</longflag>
+	   <label>Learning Rate</label>
+	   <description><![CDATA[A value (0.0 - 1.0) that defines how fast is the evolution parameters into each register iteration.]]></description>
+	   <default>0.1</default>
+	   <constraints>
+	   <minimum>0</minimum>
+	   <maximum>1</maximum>
+	   <step>0.1</step>
+	   </constraints>
+	</double>
+	<double>
+	   <name>metricFixedStd</name>
+	   <longflag>--mfStd</longflag>
+	   <label>Metric Standard Deviation (Fixed Image)</label>
+	   <description><![CDATA[A value that defines the range similarity search of the metric method]]></description>
+	   <default>0.4</default>
+	   <constraints>
+	   <minimum>0.1</minimum>
+	   <maximum>2.0</maximum>
+	   <step>0.1</step>
+	   </constraints>
+	</double>
+	<double>
+	   <name>metricMovingStd</name>
+	   <longflag>--mmfStd</longflag>
+	   <label>Metric Standard Deviation (Moving Image)</label>
+	   <description><![CDATA[A value that defines the range similarity search of the metric method]]></description>
+	   <default>0.4</default>
+	   <constraints>
+	   <minimum>0.1</minimum>
+	   <maximum>2.0</maximum>
+	   <step>0.1</step>
+	   </constraints>
+	</double>
+	<integer>
+	   <name>nInteration</name>
+	   <longflag>--nInter</longflag>
+	   <label>Number of Iterations</label>
+	   <description><![CDATA[The number of interation needed to complete the registration process]]></description>
+	   <default>1500</default>
+	   <constraints>
+	   <minimum>100</minimum>
+	   <maximum>3000</maximum>
+	   <step>50</step>
+	   </constraints>
+	</integer>	
    </parameters>
 
-   <parameters advanced="true">	
+
+<parameters advanced="true">	
 	<label>T1w Volume Filtering Parameters Set</label>
 	<description><![CDATA[Image filtering parameters specific for T1w image modality]]></description>
 	<double>
 	   <name>condutanceT1</name>
 	   <longflag>--condutanceT1</longflag>
-	   <flag>c</flag>
 	   <label>Condutance</label>
 	   <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
 	   <default>5</default>
@@ -165,7 +232,6 @@
 	<integer>
 	   <name>iterationsT1</name>
 	   <longflag>--iterationsT1</longflag>
-	   <flag>i</flag>
 	   <label>Number of Iterations</label>
 	   <description><![CDATA[A integer value that defines the number of iterations.]]></description>
 	   <default>5</default>
@@ -178,7 +244,6 @@
 	<double>
 	   <name>timeStepT1</name>
 	   <longflag>--timestepT1</longflag>
-	   <flag>t</flag>
 	   <label>Time Step</label>
 	   <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See 			GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
 	   <default>0.0625</default>
@@ -191,7 +256,6 @@
 	<double>
 	   <name>qT1</name>
 	   <longflag>--qT1</longflag>
-	   <flag>q</flag>
 	   <label>Anomalous Parameter</label>
 	   <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
 	   <default>1.20</default>
@@ -209,7 +273,6 @@
 	<double>
 	   <name>condutanceT1Gd</name>
 	   <longflag>--condutanceT1Gd</longflag>
-	   <flag>c</flag>
 	   <label>Condutance</label>
 	   <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
 	   <default>5</default>
@@ -222,7 +285,6 @@
 	<integer>
 	   <name>iterationsT1Gd</name>
 	   <longflag>--iterationsT1Gd</longflag>
-	   <flag>i</flag>
 	   <label>Number of Iterations</label>
 	   <description><![CDATA[A integer value that defines the number of iterations.]]></description>
 	   <default>5</default>
@@ -235,7 +297,6 @@
 	<double>
 	   <name>timeStepT1Gd</name>
 	   <longflag>--timestepT1Gd</longflag>
-	   <flag>t</flag>
 	   <label>Time Step</label>
 	   <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
 	   <default>0.0625</default>
@@ -248,7 +309,6 @@
 	<double>
 	   <name>qT1Gd</name>
 	   <longflag>--qT1Gd</longflag>
-	   <flag>q</flag>
 	   <label>Anomalous Parameter</label>
 	   <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
 	   <default>1.25</default>
@@ -266,7 +326,6 @@
 	<double>
 	   <name>condutanceFLAIR</name>
 	   <longflag>--condutanceFLAIR</longflag>
-	   <flag>c</flag>
 	   <label>Condutance</label>
 	   <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
 	   <default>5</default>
@@ -279,7 +338,6 @@
 	<integer>
 	   <name>iterationsFLAIR</name>
 	   <longflag>--iterationsFLAIR</longflag>
-	   <flag>i</flag>
 	   <label>Number of Iterations</label>
 	   <description><![CDATA[A integer value that defines the number of iterations.]]></description>
 	   <default>6</default>
@@ -292,7 +350,6 @@
 	<double>
 	   <name>timeStepFLAIR</name>
 	   <longflag>--timestepFLAIR</longflag>
-	   <flag>t</flag>
 	   <label>Time Step</label>
 	   <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See 			GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
 	   <default>0.0625</default>
@@ -305,7 +362,6 @@
 	<double>
 	   <name>qFLAIR</name>
 	   <longflag>--qFLAIR</longflag>
-	   <flag>q</flag>
 	   <label>Anomalous Parameter</label>
 	   <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
 	   <default>1.20</default>
@@ -323,7 +379,6 @@
 	<double>
 	   <name>condutanceFA</name>
 	   <longflag>--condutanceFA</longflag>
-	   <flag>c</flag>
 	   <label>Condutance</label>
 	   <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
 	   <default>5</default>
@@ -336,7 +391,6 @@
 	<integer>
 	   <name>iterationsFA</name>
 	   <longflag>--iterationsFA</longflag>
-	   <flag>i</flag>
 	   <label>Number of Iterations</label>
 	   <description><![CDATA[A integer value that defines the number of iterations.]]></description>
 	   <default>5</default>
@@ -349,7 +403,6 @@
 	<double>
 	   <name>timeStepFA</name>
 	   <longflag>--timestepFA</longflag>
-	   <flag>t</flag>
 	   <label>Time Step</label>
 	   <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See 			GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
 	   <default>0.0625</default>
@@ -362,7 +415,6 @@
 	<double>
 	   <name>qFA</name>
 	   <longflag>--qFA</longflag>
-	   <flag>q</flag>
 	   <label>Anomalous Parameter</label>
 	   <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
 	   <default>0.5</default>
@@ -373,4 +425,6 @@
 	   </constraints>
 	</double>
    </parameters> 
+
+   
 </executable>

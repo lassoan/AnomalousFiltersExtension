@@ -32,77 +32,119 @@ int DoIt( int argc, char * argv[], T )
 {
     PARSE_ARGS;
 
-    typedef    float InputPixelType;
-    typedef    T OutputPixelType;
+    typedef float InputPixelType;
+    typedef T OutputPixelType;
+    const unsigned int Dimension = 3;
 
-    typedef itk::Image<InputPixelType,  3> InputImageType;
-    typedef itk::Image<OutputPixelType, 3> OutputImageType;
+    typedef itk::Image<InputPixelType,  Dimension> InputImageType;
+    typedef itk::Image<OutputPixelType, Dimension> OutputImageType;
     typedef itk::CastImageFilter<InputImageType, OutputImageType> CastType;
 
     typedef itk::ImageFileReader<InputImageType>  ReaderType;
     typedef itk::ImageFileWriter<OutputImageType> WriterType;
-
-    //Create the temporary directory for the intermediated images
-    std::stringstream cmdMkdir;
-    cmdMkdir<<"mkdir "<<outputFolder.c_str();
-    system(cmdMkdir.str().c_str());
 
     //Read the input volumes
     typename ReaderType::Pointer readerT1 = ReaderType::New();
     typename ReaderType::Pointer readerT1Gd = ReaderType::New();
     typename ReaderType::Pointer readerFLAIR = ReaderType::New();
     typename ReaderType::Pointer readerFA = ReaderType::New();
+    typename ReaderType::Pointer readerAtlas = ReaderType::New();
     itk::PluginFilterWatcher watchReader(readerT1, "Read T1 Volume", CLPProcessInformation);
     readerT1->SetFileName( t1Volume.c_str() );
     readerT1Gd->SetFileName( t1GdVolume.c_str() );
     readerFLAIR->SetFileName(FLAIRVolume.c_str());
     readerFA->SetFileName(FAVolume.c_str());
+    readerAtlas->SetFileName(fixedVolume.c_str());
 
     typename CastType::Pointer caster = CastType::New();
     typename WriterType::Pointer writer = WriterType::New();
     //T1
     std::stringstream saveTmpPathT1;
-    saveTmpPathT1<<outputFolder.c_str()<<"/t1Volume.nii";
+    saveTmpPathT1<<outputFolder.c_str()<<"/t1Volume.nii.gz";
     writer->SetFileName(saveTmpPathT1.str());
     caster->SetInput(readerT1->GetOutput());
     writer->SetInput(caster->GetOutput());
     writer->Update();
     //T1-Gd
     std::stringstream saveTmpPathT1Gd;
-    saveTmpPathT1Gd<<outputFolder.c_str()<<"/t1GdVolume.nii";
+    saveTmpPathT1Gd<<outputFolder.c_str()<<"/t1GdVolume.nii.gz";
     writer->SetFileName(saveTmpPathT1Gd.str());
     caster->SetInput(readerT1Gd->GetOutput());
     writer->SetInput(caster->GetOutput());
     writer->Update();
     //T2-FLAIR
     std::stringstream saveTmpPathFLAIR;
-    saveTmpPathFLAIR<<outputFolder.c_str()<<"/FLAIRVolume.nii";
+    saveTmpPathFLAIR<<outputFolder.c_str()<<"/FLAIRVolume.nii.gz";
     writer->SetFileName(saveTmpPathFLAIR.str());
     caster->SetInput(readerFLAIR->GetOutput());
     writer->SetInput(caster->GetOutput());
     writer->Update();
     //DTI-FA
     std::stringstream saveTmpPathFA;
-    saveTmpPathFA<<outputFolder.c_str()<<"/FAVolume.nii";
+    saveTmpPathFA<<outputFolder.c_str()<<"/FAVolume.nii.gz";
     writer->SetFileName(saveTmpPathFA.str());
     caster->SetInput(readerFA->GetOutput());
     writer->SetInput(caster->GetOutput());
     writer->Update();
+    //Atlas
+    std::stringstream saveTmpPathAtlas;
+    saveTmpPathAtlas<<outputFolder.c_str()<<"/AtlasVolume.nii.gz";
+    writer->SetFileName(saveTmpPathAtlas.str());
+    caster->SetInput(readerAtlas->GetOutput());
+    writer->SetInput(caster->GetOutput());
+    writer->Update();
 
-    //TODO: Trocar brain extraction para Freesurfer ... mri_watershed e mri_nu_correct (bias correction)
-    //Brain extraction - Freesurfer
-    BrainExtraction bet(outputFolder.c_str());
-    bet.setF(valueF);
-    bet.setG(valueG);
-    bet.isOptionB(optionB);
+    //Brain extraction - Freesurfer and FSL
+    BrainExtraction brainExtraction(outputFolder.c_str());
+    brainExtraction.setF(valueF);
+    brainExtraction.setG(valueG);
+    brainExtraction.useOptionB(optionB);
+    brainExtraction.setPreFlooding(preFlooding);
 
-    bet.runBET(BrainExtraction::T1);
-    bet.runBET(BrainExtraction::T1GD);
-    bet.runBET(BrainExtraction::FLAIR);
-    bet.runBET(BrainExtraction::FA);
+    //Brain extraction for T1 weighted image
+    brainExtraction.setSkullStripMethod(skullStripMethodT1);
+    if(brainExtraction.getSkullStripMethod()==string("Fs-watershed")){
+        brainExtraction.runFsWatershed(BrainExtraction::T1);
+    }else{
+        brainExtraction.runBET(BrainExtraction::T1);
+    }
 
+    //Brain extraction for T1-Gd weighted image
+    brainExtraction.setSkullStripMethod(skullStripMethodT1Gd);
+    if(brainExtraction.getSkullStripMethod()==string("Fs-watershed")){
+        brainExtraction.runFsWatershed(BrainExtraction::T1GD);
+    }else{
+        brainExtraction.runBET(BrainExtraction::T1GD);
+    }
+
+    //Brain extraction for FLAIR weighted image
+    brainExtraction.setSkullStripMethod(skullStripMethodFLAIR);
+    if(brainExtraction.getSkullStripMethod()==string("Fs-watershed")){
+        brainExtraction.runFsWatershed(BrainExtraction::FLAIR);
+    }else{
+        brainExtraction.runBET(BrainExtraction::FLAIR);
+    }
+
+    //Brain extraction for DTI-FA weighted image
+    brainExtraction.setSkullStripMethod(skullStripMethodFA);
+    if(brainExtraction.getSkullStripMethod()==string("Fs-watershed")){
+        brainExtraction.runFsWatershed(BrainExtraction::FA);
+    }else{
+        brainExtraction.runBET(BrainExtraction::FA);
+    }
+
+    //TODO: mri_nu_correct (bias correction) depois do coregistro!!!
     //Multimodal image registering process
-
+    MultimodalityRegistration registration(outputFolder.c_str());
+    registration.setNSamples(nSamples);
+//    registration.setLearnRate(learnRate);
+    registration.setNumInteration(nInteration);
+//    registration.setMetricFixedStd(metricFixedStd);
+//    registration.setMetricMovingStd(metricMovingStd);
+    registration.startCLIRegistration(MultimodalityRegistration::T1);
+    registration.startCLIRegistration(MultimodalityRegistration::T1Gd);
+    registration.startCLIRegistration(MultimodalityRegistration::FLAIR);
+    registration.startCLIRegistration(MultimodalityRegistration::FA);
 
     //Image filtering process for all the images
     //  typedef itk::AnisotropicAnomalousDiffusionImageFilter<InputImageType, InputImageType>  FilterType;
