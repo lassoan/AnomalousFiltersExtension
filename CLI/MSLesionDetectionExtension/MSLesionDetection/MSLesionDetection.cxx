@@ -9,6 +9,9 @@
 //Registering Methods
 #include "Registration/MultimodalityRegistration.h"
 
+//Non Uniformity Methods
+#include "NonUniformity/NonUniformityN3.h"
+
 //Segmentation Methods
 
 
@@ -137,14 +140,34 @@ int DoIt( int argc, char * argv[], T )
     //Multimodal image registering process
     MultimodalityRegistration registration(outputFolder.c_str());
     registration.setNSamples(nSamples);
-//    registration.setLearnRate(learnRate);
+    //    registration.setLearnRate(learnRate);
     registration.setNumInteration(nInteration);
-//    registration.setMetricFixedStd(metricFixedStd);
-//    registration.setMetricMovingStd(metricMovingStd);
+    //    registration.setMetricFixedStd(metricFixedStd);
+    //    registration.setMetricMovingStd(metricMovingStd);
     registration.startCLIRegistration(MultimodalityRegistration::T1);
     registration.startCLIRegistration(MultimodalityRegistration::T1Gd);
     registration.startCLIRegistration(MultimodalityRegistration::FLAIR);
     registration.startCLIRegistration(MultimodalityRegistration::FA);
+
+    //Non Uniformity process
+    NonUniformityN3 nu(outputFolder.c_str());
+    nu.setUseNUT1(useNUT1);
+    nu.setUseNUT1GD(useNUT1Gd);
+    nu.setUseNUFLAIR(useNUFLAIR);
+    nu.setUseNUFA(useNUFA);
+
+    if(nu.getUseNUT1()){
+        nu.startNonUniformity(NonUniformityN3::T1);
+    }
+    if(nu.getUseNUT1GD()){
+        nu.startNonUniformity(NonUniformityN3::T1Gd);
+    }
+    if(nu.getUseNUFLAIR()){
+        nu.startNonUniformity(NonUniformityN3::FLAIR);
+    }
+    if(nu.getUseNUFA()){
+        nu.startNonUniformity(NonUniformityN3::FA);
+    }
 
     //Image filtering process for all the images
     //  typedef itk::AnisotropicAnomalousDiffusionImageFilter<InputImageType, InputImageType>  FilterType;

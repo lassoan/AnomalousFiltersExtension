@@ -44,6 +44,8 @@ BrainExtraction/BrainExtractionTool.h
 BrainExtraction/BrainExtractionTool.cxx
 Registration/MultimodalityRegistration.h
 Registration/MultimodalityRegistration.cxx
+NonUniformity/NonUniformityN3.h
+NonUniformity/NonUniformityN3.cxx
   )
 
 #-----------------------------------------------------------------------------

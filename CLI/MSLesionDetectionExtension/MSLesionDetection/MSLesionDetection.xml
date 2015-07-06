@@ -213,6 +213,39 @@
 	</integer>	
    </parameters>
 
+<parameters advanced="true">
+	<label>Non Uniformity Correction</label>
+	<description><![CDATA[Algorithm to correct the non uniformity effect resulting from the rf pulse]]></description>
+	<boolean>
+	      <name>useNUT1</name>
+	      <longflag>--useNUT1</longflag>
+	      <description><![CDATA[Use the non uniformity step on all brain segmented images. This step is useful for the tissue segmentation procedure. Choose if you want apply it on T1w volume.]]></description>
+	      <label>Apply on T1w</label>
+	      <default>true</default>
+	</boolean>
+	<boolean>
+	      <name>useNUT1Gd</name>
+	      <longflag>--useNUT1Gd</longflag>
+	      <description><![CDATA[Use the non uniformity step on all brain segmented images. This step is useful for the tissue segmentation procedure. Choose if you want apply it on T1-Gdw volume.]]></description>
+	      <label>Apply on T1-Gdw</label>
+	      <default>true</default>
+	</boolean>
+	<boolean>
+	      <name>useNUFLAIR</name>
+	      <longflag>--useNUFLAIR</longflag>
+	      <description><![CDATA[Use the non uniformity step on all brain segmented images. This step is useful for the tissue segmentation procedure. Choose if you want apply it on FLAIR volume.]]></description>
+	      <label>Apply on FLAIR</label>
+	      <default>true</default>
+	</boolean>
+	<boolean>
+	      <name>useNUFA</name>
+	      <longflag>--useNUFA</longflag>
+	      <description><![CDATA[Use the non uniformity step on all brain segmented images. This step is useful for the tissue segmentation procedure. Choose if you want apply it on DTI-FA volume.]]></description>
+	      <label>Apply on FA</label>
+	      <default>true</default>
+	</boolean>
+</parameters>
+
 
 <parameters advanced="true">	
 	<label>T1w Volume Filtering Parameters Set</label>
