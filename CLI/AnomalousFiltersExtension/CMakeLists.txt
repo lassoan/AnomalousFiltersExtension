@@ -20,6 +20,7 @@ include(${Slicer_USE_FILE})
 # Extension modules
 add_subdirectory(AADImageFilter)
 add_subdirectory(IADImageFilter)
+add_subdirectory(AADDiffusionWeightedData)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------
