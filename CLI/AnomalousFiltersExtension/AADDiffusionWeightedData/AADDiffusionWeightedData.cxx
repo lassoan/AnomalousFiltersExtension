@@ -1,17 +1,31 @@
-#include "itkImageFileWriter.h"
-
 #include "AnisotropicAnomalousDiffusionImageFilter.h"
-#include "itkCastImageFilter.h"
 
 #include "itkPluginUtilities.h"
 
+#include <itkMetaDataObject.h>
+#include <itkImageFileWriter.h>
+#include <itkNrrdImageIO.h>
+#include <itkCastImageFilter.h>
+#if ITK_VERSION_MAJOR < 4
+#include "itkCompose3DCovariantVectorImageFilter.h"
+#else
+#include "itkComposeImageFilter.h"
+#endif
+
+
+#include <itkDiffusionTensor3DReconstructionImageFilter.h>
+#include <itkTensorFractionalAnisotropyImageFilter.h>
+#include <itkTensorRelativeAnisotropyImageFilter.h>
+
 #include "AADDiffusionWeightedDataCLP.h"
+
 
 // Use an anonymous namespace to keep class types and function names
 // from colliding when module is used as shared object module.  Every
 // thing should be in an anonymous namespace except for the module
 // entry point, e.g. main()
 //
+
 namespace
 {
 
@@ -20,44 +34,182 @@ int DoIt( int argc, char * argv[], T )
 {
     PARSE_ARGS;
 
-    typedef    float InputPixelType;
-    typedef    T OutputPixelType;
+    const unsigned int Dimension = 3;
+    unsigned int numberOfImages = 0;
+    unsigned int numberOfGradientImages = 0;
+    bool readb0 = false;
+    double b0 = 0;
+    typedef short                                           PixelType;
+    typedef itk::VectorImage<PixelType, Dimension>          VectorImageType;
+    typedef itk::Image< PixelType, Dimension >              ScalarImageType;
+    itk::ImageFileReader<VectorImageType>::Pointer reader = itk::ImageFileReader<VectorImageType>::New();
+    VectorImageType::Pointer img;
+    typedef itk::AnisotropicAnomalousDiffusionImageFilter<ScalarImageType, ScalarImageType> AADFilterType;
+    // Set the properties for NrrdReader
+    reader->SetFileName( inputVolume.c_str());
+    // Read in the nrrd data. The file contains the reference image and the gradient
+    // images.
+    try
+    {
+        reader->Update();
+        img = reader->GetOutput();
+    }
+    catch (itk::ExceptionObject &ex)
+    {
+        std::cout << ex << std::endl;
+        return EXIT_FAILURE;
+    }
+    // Here we instantiate the DiffusionTensor3DReconstructionImageFilter class.
+    // The class is templated over the pixel types of the reference, gradient
+    // and the to be created tensor pixel's precision. (We use double here). It
+    // takes as input the Reference (B0 image aquired in the absence of diffusion
+    // sensitizing gradients), 'n' Gradient images and their directions and produces
+    // as output an image of tensors with pixel-type DiffusionTensor3D.
+    //
+    typedef itk::DiffusionTensor3DReconstructionImageFilter<
+            PixelType, PixelType, double > TensorReconstructionImageFilterType;
+    // -------------------------------------------------------------------------
+    // Parse the Nrrd headers to get the B value and the gradient directions used
+    // for diffusion weighting.
+    //
+    // The Nrrd headers should look like :
+    // The tags specify the B value and the gradient directions. If gradient
+    // directions are (0,0,0), it indicates that it is a reference image.
+    //
+    // DWMRI_b-value:=800
+    // DWMRI_gradient_0000:= 0 0 0
+    // DWMRI_gradient_0001:=-1.000000       0.000000        0.000000
+    // DWMRI_gradient_0002:=-0.166000       0.986000        0.000000
+    // DWMRI_gradient_0003:=0.110000        0.664000        0.740000
+    // ...
+    //
+    itk::MetaDataDictionary imgMetaDictionary = img->GetMetaDataDictionary();
+    std::vector<std::string> imgMetaKeys = imgMetaDictionary.GetKeys();
+    std::vector<std::string>::const_iterator itKey = imgMetaKeys.begin();
+    std::string metaString;
+    TensorReconstructionImageFilterType::GradientDirectionType vect3d;
+    TensorReconstructionImageFilterType::GradientDirectionContainerType::Pointer
+            DiffusionVectors =
+            TensorReconstructionImageFilterType::GradientDirectionContainerType::New();
+    for (; itKey != imgMetaKeys.end(); ++itKey)
+    {
+        double x,y,z;
+        itk::ExposeMetaData<std::string> (imgMetaDictionary, *itKey, metaString);
+        if (itKey->find("DWMRI_gradient") != std::string::npos)
+        {
+            std::cout << *itKey << " ---> " << metaString << std::endl;
+            sscanf(metaString.c_str(), "%lf %lf %lf\n", &x, &y, &z);
+            vect3d[0] = x; vect3d[1] = y; vect3d[2] = z;
+            DiffusionVectors->InsertElement( numberOfImages, vect3d );
+            ++numberOfImages;
+            // If the direction is 0.0, this is a reference image
+            if (vect3d[0] == 0.0 &&
+                    vect3d[1] == 0.0 &&
+                    vect3d[2] == 0.0)
+            {
+                continue;
+            }
+            ++numberOfGradientImages;
+        }
+        else if (itKey->find("DWMRI_b-value") != std::string::npos)
+        {
+            std::cout << *itKey << " ---> " << metaString << std::endl;
+            readb0 = true;
+            b0 = atof(metaString.c_str());
+        }
+    }
+    std::cout << "Number of gradient images: "
+              << numberOfGradientImages
+              << " and Number of reference images: "
+              << numberOfImages - numberOfGradientImages
+              << std::endl;
+    if(!readb0)
+    {
+        std::cerr << "BValue not specified in header file" << std::endl;
+        return EXIT_FAILURE;
+    }
 
-    typedef itk::Image<InputPixelType,  3> InputImageType;
-    typedef itk::Image<OutputPixelType, 3> OutputImageType;
+    std::vector< ScalarImageType::Pointer > imageContainer;
+    // iterator to iterate over the DWI Vector image just read in.
+    typedef itk::ImageRegionConstIterator< VectorImageType >         DWIIteratorType;
+    DWIIteratorType dwiit( img, img->GetBufferedRegion() );
+    typedef itk::ImageRegionIterator< ScalarImageType > IteratorType;
 
-    typedef itk::ImageFileReader<InputImageType>  ReaderType;
-    typedef itk::ImageFileWriter<OutputImageType> WriterType;
-    typedef itk::CastImageFilter<InputImageType, OutputImageType> CastType;
 
-    typedef itk::AnisotropicAnomalousDiffusionImageFilter<InputImageType, InputImageType> FilterType;
 
-    typename ReaderType::Pointer reader = ReaderType::New();
-    itk::PluginFilterWatcher watchReader(reader, "Read Volume",CLPProcessInformation);
+#if ITK_VERSION_MAJOR < 4
+    typedef itk::Compose3DCovariantVectorImageFilter<ScalarImageType,
+            VectorImageType> ScalarToVectorFilterType;
+#else
+    typedef itk::ComposeImageFilter<ScalarImageType,
+            VectorImageType> ScalarToVectorFilterType;
+#endif
+    typename ScalarToVectorFilterType::Pointer scalarToVectorImageFilter = ScalarToVectorFilterType::New();
+    for( unsigned int i = 0; i<numberOfImages; i++ )
+    {
+        ScalarImageType::Pointer image = ScalarImageType::New();
+        image->CopyInformation( img );
+        image->SetBufferedRegion( img->GetBufferedRegion() );
+        image->SetRequestedRegion( img->GetRequestedRegion() );
+        image->Allocate();
+        IteratorType it( image, image->GetBufferedRegion() );
+        dwiit.GoToBegin();
+        it.GoToBegin();
+        while (!it.IsAtEnd())
+        {
+            it.Set(dwiit.Get()[i]);
+            ++it;
+            ++dwiit;
+        }
+        imageContainer.push_back( image );
 
-    reader->SetFileName( inputVolume.c_str() );
+    }
 
-    typename FilterType::Pointer filter = FilterType::New();
-    itk::PluginFilterWatcher watchFilter(filter, "Anisotropic Anomalous Diffusion",CLPProcessInformation);
+    for(unsigned int countImage=0; countImage<numberOfImages; countImage++){
+        typename AADFilterType::Pointer filter = AADFilterType::New();
+        filter->SetInput( imageContainer[countImage] );
+        filter->SetIterations(iterations);
+        filter->SetCondutance(condutance);
+        filter->SetTimeStep(timeStep);
+        filter->SetQ(q);
+        filter->Update();
 
-    filter->SetInput( reader->GetOutput() );
-    filter->SetIterations(iterations);
-    filter->SetCondutance(condutance);
-    filter->SetTimeStep(timeStep);
-    filter->SetQ(q);
+        scalarToVectorImageFilter->SetInput(countImage, filter->GetOutput());
+    }
 
-    typename CastType::Pointer cast = CastType::New();
-    cast->SetInput( filter->GetOutput() );
+    scalarToVectorImageFilter->Update();
+    VectorImageType::Pointer diffusionImage = scalarToVectorImageFilter->GetOutput();
 
-    typename WriterType::Pointer writer = WriterType::New();
-    itk::PluginFilterWatcher watchWriter(writer, "Write Volume",CLPProcessInformation);
+    // let's write it out
 
-    writer->SetFileName( outputVolume.c_str() );
-    writer->SetInput( cast->GetOutput() );
-    writer->SetUseCompression(1);
-    writer->Update();
+    typename itk::NrrdImageIO::Pointer io = itk::NrrdImageIO::New();
+
+    itk::MetaDataDictionary metaDataDictionary;
+    metaDataDictionary = reader->GetMetaDataDictionary();
+
+    io->SetFileTypeToBinary();
+    io->SetMetaDataDictionary( metaDataDictionary );
+
+    typedef itk::ImageFileWriter<VectorImageType> WriterType;
+    typename WriterType::Pointer nrrdWriter = WriterType::New();
+    nrrdWriter->UseInputMetaDataDictionaryOff();
+    nrrdWriter->SetInput( diffusionImage );
+    nrrdWriter->SetImageIO(io);
+    nrrdWriter->SetFileName( outputVolume.c_str() );
+    nrrdWriter->UseCompressionOn();
+    try
+    {
+        nrrdWriter->Update();
+    }
+    catch( itk::ExceptionObject e )
+    {
+        std::cerr << argv[0] << ": exception caught !" << std::endl;
+        std::cerr << e << std::endl;
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
+
 }
 
 } // end of anonymous namespace
