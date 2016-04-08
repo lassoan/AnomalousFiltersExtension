@@ -1,6 +1,15 @@
 #include "itkImageFileWriter.h"
 
-#include "itkSmoothingRecursiveGaussianImageFilter.h"
+//Segmentation Methods - ITK
+//#include "itkBayesianClassifierImageFilter.h"
+//#include "itkBayesianClassifierInitializationImageFilter.h"
+//#include "itkMRFImageFilter.h"
+//#include "itkDistanceToCentroidMembershipFunction.h"
+//#include "itkMinimumDecisionRule.h"
+//#include "itkScalarImageKmeansImageFilter.h"
+//#include "itkSmoothingRecursiveGaussianImageFilter.h"
+
+#include "Segmentation/DTIMapSegmentation.h"
 
 #include "itkPluginUtilities.h"
 
@@ -19,31 +28,35 @@ int DoIt( int argc, char * argv[], T )
 {
   PARSE_ARGS;
 
-  typedef    T InputPixelType;
-  typedef    T OutputPixelType;
+//  typedef    T InputPixelType;
+//  typedef    T OutputPixelType;
 
-  typedef itk::Image<InputPixelType,  3> InputImageType;
-  typedef itk::Image<OutputPixelType, 3> OutputImageType;
+//  typedef itk::Image<InputPixelType,  3> InputImageType;
+//  typedef itk::Image<OutputPixelType, 3> OutputImageType;
 
-  typedef itk::ImageFileReader<InputImageType>  ReaderType;
-  typedef itk::ImageFileWriter<OutputImageType> WriterType;
+//  typedef itk::ImageFileReader<InputImageType>  ReaderType;
+//  typedef itk::ImageFileWriter<OutputImageType> WriterType;
 
-  typedef itk::SmoothingRecursiveGaussianImageFilter<
-    InputImageType, OutputImageType>  FilterType;
+    DTIMapSegmentation segmentation(FAInputVolume.c_str(),outputLabels.c_str());
+    segmentation.setNumClasses(numClasses);
+    segmentation.runSegmentation(DTIMapSegmentation::BAYES);
 
-  typename ReaderType::Pointer reader = ReaderType::New();
+//  typedef itk::SmoothingRecursiveGaussianImageFilter<
+//    InputImageType, OutputImageType>  FilterType;
 
-  reader->SetFileName( inputVolume.c_str() );
+//  typename ReaderType::Pointer reader = ReaderType::New();
 
-  typename FilterType::Pointer filter = FilterType::New();
-  filter->SetInput( reader->GetOutput() );
-  filter->SetSigma( sigma );
+//  reader->SetFileName( FAInputVolume.c_str() );
 
-  typename WriterType::Pointer writer = WriterType::New();
-  writer->SetFileName( outputVolume.c_str() );
-  writer->SetInput( filter->GetOutput() );
-  writer->SetUseCompression(1);
-  writer->Update();
+//  typename FilterType::Pointer filter = FilterType::New();
+//  filter->SetInput( reader->GetOutput() );
+//  filter->SetSigma( sigma );
+
+//  typename WriterType::Pointer writer = WriterType::New();
+//  writer->SetFileName( outputLabelVolume.c_str() );
+//  writer->SetInput( filter->GetOutput() );
+//  writer->SetUseCompression(1);
+//  writer->Update();
 
   return EXIT_SUCCESS;
 }
@@ -59,7 +72,7 @@ int main( int argc, char * argv[] )
 
   try
     {
-    itk::GetImageType(inputVolume, pixelType, componentType);
+    itk::GetImageType(FAInputVolume, pixelType, componentType);
 
     // This filter handles all types on input, but only produces
     // signed types

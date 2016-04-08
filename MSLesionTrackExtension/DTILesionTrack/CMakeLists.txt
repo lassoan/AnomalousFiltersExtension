@@ -38,6 +38,12 @@ SEMMacroBuildCLI(
   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
   INCLUDE_DIRECTORIES ${MODULE_INCLUDE_DIRECTORIES}
   ADDITIONAL_SRCS ${MODULE_SRCS}
+BrainExtraction/BrainExtractionTool.h
+BrainExtraction/BrainExtractionTool.cxx
+DWIEddyCorrect/DWIEddyCorrect.h
+DWIEddyCorrect/DWIEddyCorrect.cxx
+Segmentation/DTIMapSegmentation.cxx
+Segmentation/DTIMapSegmentation.h
   )
 
 #-----------------------------------------------------------------------------

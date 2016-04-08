@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8.9)
 
-project(MSLesionTrack)
+project(MSLesionTrackExtension)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
 set(EXTENSION_HOMEPAGE "http://slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/MSLesionTrack")
-set(EXTENSION_CATEGORY "Analysis.MS Lesion Track")
+set(EXTENSION_CATEGORY "Segmentation.MS Lesion Track")
 set(EXTENSION_CONTRIBUTORS "John Doe (AnyWare Corp.)")
 set(EXTENSION_DESCRIPTION "This is an example of a simple extension")
 set(EXTENSION_ICONURL "http://www.example.com/Slicer/Extensions/MSLesionTrack.png")

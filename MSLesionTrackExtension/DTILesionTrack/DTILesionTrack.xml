@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+  <category>Segmentation.MS Lesion Track.Diffusion Image Segmentation</category>
+  <title>DTI Lesion Track</title>
+  <description><![CDATA[This is a CLI module that can be bundled in an extension]]></description>
+  <version>0.0.1</version>
+  <documentation-url>http://www.example.com/Slicer/Modules/DTILesionTrack</documentation-url>
+  <license>Slicer</license>
+  <contributor>FirstName LastName (Institution), FirstName LastName (Institution)</contributor>
+  <acknowledgements>This work was partially funded by NIH grant NXNNXXNNNNNN-NNXN</acknowledgements>
+  <parameters>
+    <label>IO</label>
+    <description><![CDATA[Input/output parameters]]></description>
+	<image>
+	   <name>FAInputVolume</name>
+	   <label>DTI-FA Volume</label>
+	   <channel>input</channel>
+	   <index>0</index>
+	   <description><![CDATA[DTI FA map input volume]]></description>
+	</image>
+	<image type="label">
+	   <name>outputLabels</name>
+	   <label>Lesion Labels</label>
+	   <channel>output</channel>
+	   <index>1</index>
+	   <description><![CDATA[Output labels Volume]]></description>
+	</image>
+  </parameters>
+  <parameters>
+  <label>Segmentation Parameters</label>
+	<string-enumeration>
+	      <name>segMethod</name>
+	      <longflag>--segMethod</longflag>
+	      <description><![CDATA[Choose the segmentation method]]></description>
+	      <label>Algorithm</label>
+	      <default>MRF</default>
+	      <element>Bayesian</element>
+	      <element>MRF</element>
+	      <element>KMeans</element>
+	</string-enumeration>	
+	<integer>
+	   <name>numClasses</name>
+	   <longflag>--nClass</longflag>
+	   <label>Number of Classes</label>
+	   <description><![CDATA[Number of classes.]]></description>
+	   <default>3</default>
+	   <constraints>
+	   <minimum>1</minimum>
+	   <maximum>10</maximum>
+	   <step>1</step>
+	   </constraints>
+	</integer>
+</parameters>
+</executable>
