@@ -1,4 +1,5 @@
 #include "DTIMapSegmentation.h"
+#include <iostream>
 
 using namespace std;
 
@@ -6,6 +7,14 @@ DTIMapSegmentation::DTIMapSegmentation(const char *inputVolume, const char *outp
     this->numClasses=3;
     this->inputVolume=inputVolume;
     this->outputLabels=outputLabels;
+    this->doFiltering=false;
+}
+
+DTIMapSegmentation::DTIMapSegmentation(const char *inputVolume)
+{
+    this->numClasses=4;
+    this->inputVolume=inputVolume;
+    this->doFiltering=false;
 }
 
 int DTIMapSegmentation::getNumClasses() const
@@ -18,19 +27,64 @@ void DTIMapSegmentation::setNumClasses(int value)
     numClasses = value;
 }
 
-void DTIMapSegmentation::runSegmentation(DTIMapSegmentation::segMethod method)
+void DTIMapSegmentation::runSegmentation(DTIMapSegmentation::segMethod segmentation)
 {
-    switch (method) {
-    case BAYES:
-        BayesSegmentation();
+        switch (segmentation) {
+        case BAYES:
+            BayesSegmentation();
+            break;
+        case KMEANS:
+            KMeansSegmentation();
+            break;
+        case MRF:
+            MRFSegmentation();
+            break;
+        default:
+            break;
+        }
+
+}
+
+void DTIMapSegmentation::runFiltering(DTIMapSegmentation::filterMethod filter)
+{
+    switch (filter) {
+    case ClassicAD:
+                ClassicAnisotropicFiltering();
         break;
-    case KMEANS:
-        KMeansSegmentation();
+    case AnomalousAD:
+//                KMeansSegmentation();
+        break;
+    case NLM:
+//                MRFSegmentation();
+        break;
+    case Gaussian:
+//                MRFSegmentation();
         break;
     default:
         break;
     }
 }
+
+int DTIMapSegmentation::getNumIter() const
+{
+    return numIter;
+}
+
+void DTIMapSegmentation::setNumIter(int value)
+{
+    numIter = value;
+}
+
+bool DTIMapSegmentation::getDoFiltering() const
+{
+    return doFiltering;
+}
+
+void DTIMapSegmentation::setDoFiltering(bool value)
+{
+    doFiltering = value;
+}
+
 
 void DTIMapSegmentation::BayesSegmentation()
 {
@@ -43,6 +97,8 @@ void DTIMapSegmentation::BayesSegmentation()
 
     typedef itk::ImageFileReader< ImageType > ReaderType;
     ReaderType::Pointer reader = ReaderType::New();
+//    stringstream imagePath;
+//    imagePath<<this->folderPath<<"/t1_volume.nii.gz";
     reader->SetFileName( inputVolume );
     reader->Update();
 
@@ -88,6 +144,8 @@ void DTIMapSegmentation::BayesSegmentation()
     typedef itk::ImageFileWriter< OutputImageType >  WriterType;
     WriterType::Pointer writer = WriterType::New();
     writer->SetInput( bayesClassifier->GetOutput() );
+//    stringstream outputImage;
+//    outputImage<<this->folderPath<<"/t1_classes_labels.nii.gz";
     writer->SetFileName( outputLabels );
 
     writer->Update();
@@ -95,229 +153,229 @@ void DTIMapSegmentation::BayesSegmentation()
 
 void DTIMapSegmentation::MRFSegmentation()
 {
-//    if( argc < 7 )
-//        {
-//        std::cerr << "Usage: " << std::endl;
-//        std::cerr << argv[0];
-//        std::cerr << " inputScalarImage inputLabeledImage";
-//        std::cerr << " outputLabeledImage numberOfIterations";
-//        std::cerr << " smoothingFactor numberOfClasses";
-//        std::cerr << " mean1 mean2 ... meanN " << std::endl;
-//        return EXIT_FAILURE;
-//        }
+    //    if( argc < 7 )
+    //        {
+    //        std::cerr << "Usage: " << std::endl;
+    //        std::cerr << argv[0];
+    //        std::cerr << " inputScalarImage inputLabeledImage";
+    //        std::cerr << " outputLabeledImage numberOfIterations";
+    //        std::cerr << " smoothingFactor numberOfClasses";
+    //        std::cerr << " mean1 mean2 ... meanN " << std::endl;
+    //        return EXIT_FAILURE;
+    //        }
 
-//      const char * inputImageFileName      = ;
-//      const char * inputLabelImageFileName = argv[2];
-//      const char * outputImageFileName     = argv[3];
+    //      const char * inputImageFileName      = ;
+    //      const char * inputLabelImageFileName = argv[2];
+    //      const char * outputImageFileName     = argv[3];
 
-//      const unsigned int numberOfIterations = atoi( argv[4] );
-      const double       smoothingFactor    = 1;
-//      const unsigned int numberOfClasses    = atoi( argv[6] );
+    //      const unsigned int numberOfIterations = atoi( argv[4] );
+    const double       smoothingFactor    = 1;
+    //      const unsigned int numberOfClasses    = atoi( argv[6] );
 
-//      const unsigned int numberOfArgumentsBeforeMeans = 7;
+    //      const unsigned int numberOfArgumentsBeforeMeans = 7;
 
-//      if( static_cast<unsigned int>(argc) <
-//          numberOfClasses + numberOfArgumentsBeforeMeans )
-//        {
-//        std::cerr << "Error: " << std::endl;
-//        std::cerr << numberOfClasses << " classes have been specified ";
-//        std::cerr << "but not enough means have been provided in the command ";
-//        std::cerr << "line arguments " << std::endl;
-//        return EXIT_FAILURE;
+    //      if( static_cast<unsigned int>(argc) <
+    //          numberOfClasses + numberOfArgumentsBeforeMeans )
+    //        {
+    //        std::cerr << "Error: " << std::endl;
+    //        std::cerr << numberOfClasses << " classes have been specified ";
+    //        std::cerr << "but not enough means have been provided in the command ";
+    //        std::cerr << "line arguments " << std::endl;
+    //        return EXIT_FAILURE;
 
-//        }
-
-
-      typedef float                 PixelType;
-      const unsigned int          Dimension = 3;
-
-      typedef itk::Image<PixelType, Dimension > ImageType;
-
-      typedef itk::ImageFileReader< ImageType > ReaderType;
-      ReaderType::Pointer reader = ReaderType::New();
-      reader->SetFileName( inputVolume );
+    //        }
 
 
-      typedef unsigned char       LabelPixelType;
-      typedef itk::Image<LabelPixelType, Dimension > LabelImageType;
+    typedef float                 PixelType;
+    const unsigned int          Dimension = 3;
+
+    typedef itk::Image<PixelType, Dimension > ImageType;
+
+    typedef itk::ImageFileReader< ImageType > ReaderType;
+    ReaderType::Pointer reader = ReaderType::New();
+    reader->SetFileName( inputVolume );
+
+
+    typedef unsigned char       LabelPixelType;
+    typedef itk::Image<LabelPixelType, Dimension > LabelImageType;
 
     //First label approximation.
-      typedef itk::ScalarImageKmeansImageFilter< ImageType > KMeansFilterType;
-      KMeansFilterType::Pointer kmeansFilter = KMeansFilterType::New();
-      kmeansFilter->SetInput( reader->GetOutput() );
-      const unsigned int numberOfInitialClasses = getNumClasses();
+    typedef itk::ScalarImageKmeansImageFilter< ImageType > KMeansFilterType;
+    KMeansFilterType::Pointer kmeansFilter = KMeansFilterType::New();
+    kmeansFilter->SetInput( reader->GetOutput() );
+    const unsigned int numberOfInitialClasses = getNumClasses();
 
-      //TODO Apply the Gaussian Mixture Method to get the initial means guess.
-      double means [getNumClasses()];
-      for( unsigned k=0; k < numberOfInitialClasses; k++ )
-      {
-          means[k]=(k*50)+1;
-          kmeansFilter->AddClassWithInitialMean( means[k] );
-      }
+    //TODO Apply the Gaussian Mixture Method to get the initial means guess.
+    double means [getNumClasses()];
+    for( unsigned k=0; k < numberOfInitialClasses; k++ )
+    {
+        means[k]=(k*50)+1;
+        kmeansFilter->AddClassWithInitialMean( means[k] );
+    }
 
-//      typedef itk::ImageFileReader< LabelImageType > LabelReaderType;
-//      LabelReaderType::Pointer labelReader = LabelReaderType::New();
-//      labelReader->SetFileName( kmeansFilter->GetOutput() );
-
-
-      typedef itk::FixedArray<LabelPixelType,1>  ArrayPixelType;
-
-      typedef itk::Image< ArrayPixelType, Dimension > ArrayImageType;
-
-      typedef itk::ComposeImageFilter<
-                         ImageType, ArrayImageType > ScalarToArrayFilterType;
-
-      ScalarToArrayFilterType::Pointer
-        scalarToArrayFilter = ScalarToArrayFilterType::New();
-      scalarToArrayFilter->SetInput( reader->GetOutput() );
-
-      typedef itk::MRFImageFilter< ArrayImageType, LabelImageType > MRFFilterType;
-
-      MRFFilterType::Pointer mrfFilter = MRFFilterType::New();
-
-      mrfFilter->SetInput( scalarToArrayFilter->GetOutput() );
-
-      mrfFilter->SetNumberOfClasses( getNumClasses() );
-      mrfFilter->SetMaximumNumberOfIterations( 30 );
-      mrfFilter->SetErrorTolerance( 1e-7 );
-
-      mrfFilter->SetSmoothingFactor( smoothingFactor );
-
-      typedef itk::ImageClassifierBase<
-                                  ArrayImageType,
-                                  LabelImageType >   SupervisedClassifierType;
-
-      SupervisedClassifierType::Pointer classifier =
-                                             SupervisedClassifierType::New();
-
-      typedef itk::Statistics::MinimumDecisionRule DecisionRuleType;
-
-      DecisionRuleType::Pointer  classifierDecisionRule = DecisionRuleType::New();
-
-      classifier->SetDecisionRule( classifierDecisionRule.GetPointer() );
-
-      typedef itk::Statistics::DistanceToCentroidMembershipFunction<
-                                                        ArrayPixelType >
-                                                           MembershipFunctionType;
-
-      typedef MembershipFunctionType::Pointer MembershipFunctionPointer;
+    //      typedef itk::ImageFileReader< LabelImageType > LabelReaderType;
+    //      LabelReaderType::Pointer labelReader = LabelReaderType::New();
+    //      labelReader->SetFileName( kmeansFilter->GetOutput() );
 
 
-      double meanDistance = 0;
-      MembershipFunctionType::CentroidType centroid(1);
-      for( unsigned int i=0; i < static_cast<unsigned int>(getNumClasses()); i++ )
-        {
+    typedef itk::FixedArray<LabelPixelType,1>  ArrayPixelType;
+
+    typedef itk::Image< ArrayPixelType, Dimension > ArrayImageType;
+
+    typedef itk::ComposeImageFilter<
+            ImageType, ArrayImageType > ScalarToArrayFilterType;
+
+    ScalarToArrayFilterType::Pointer
+            scalarToArrayFilter = ScalarToArrayFilterType::New();
+    scalarToArrayFilter->SetInput( reader->GetOutput() );
+
+    typedef itk::MRFImageFilter< ArrayImageType, LabelImageType > MRFFilterType;
+
+    MRFFilterType::Pointer mrfFilter = MRFFilterType::New();
+
+    mrfFilter->SetInput( scalarToArrayFilter->GetOutput() );
+
+    mrfFilter->SetNumberOfClasses( getNumClasses() );
+    mrfFilter->SetMaximumNumberOfIterations( 30 );
+    mrfFilter->SetErrorTolerance( 1e-7 );
+
+    mrfFilter->SetSmoothingFactor( smoothingFactor );
+
+    typedef itk::ImageClassifierBase<
+            ArrayImageType,
+            LabelImageType >   SupervisedClassifierType;
+
+    SupervisedClassifierType::Pointer classifier =
+            SupervisedClassifierType::New();
+
+    typedef itk::Statistics::MinimumDecisionRule DecisionRuleType;
+
+    DecisionRuleType::Pointer  classifierDecisionRule = DecisionRuleType::New();
+
+    classifier->SetDecisionRule( classifierDecisionRule.GetPointer() );
+
+    typedef itk::Statistics::DistanceToCentroidMembershipFunction<
+            ArrayPixelType >
+            MembershipFunctionType;
+
+    typedef MembershipFunctionType::Pointer MembershipFunctionPointer;
+
+
+    double meanDistance = 0;
+    MembershipFunctionType::CentroidType centroid(1);
+    for( unsigned int i=0; i < static_cast<unsigned int>(getNumClasses()); i++ )
+    {
         MembershipFunctionPointer membershipFunction =
-                                             MembershipFunctionType::New();
+                MembershipFunctionType::New();
 
-//        centroid[0] = atof( argv[i+numberOfArgumentsBeforeMeans] );
+        //        centroid[0] = atof( argv[i+numberOfArgumentsBeforeMeans] );
         centroid[0]=kmeansFilter->GetFinalMeans()[i];
 
         membershipFunction->SetCentroid( centroid );
 
         classifier->AddMembershipFunction( membershipFunction );
         meanDistance += static_cast< double > (centroid[0]);
-        }
-//      if (getNumClasses() > 0)
-//        {
-        meanDistance /= getNumClasses();
-//        }
-//      else
-//        {
-//        std::cerr << "ERROR: numberOfClasses is 0" << std::endl;
-//        return EXIT_FAILURE;
-//        }
+    }
+    //      if (getNumClasses() > 0)
+    //        {
+    meanDistance /= getNumClasses();
+    //        }
+    //      else
+    //        {
+    //        std::cerr << "ERROR: numberOfClasses is 0" << std::endl;
+    //        return EXIT_FAILURE;
+    //        }
 
-      mrfFilter->SetSmoothingFactor( smoothingFactor );
+    mrfFilter->SetSmoothingFactor( smoothingFactor );
 
-      mrfFilter->SetNeighborhoodRadius( 1 );
+    mrfFilter->SetNeighborhoodRadius( 1 );
 
-//TODO Review how is the matrix neighborhood is build!
-//      std::vector< double > weights;
-//      weights.push_back(1.5);
-//      weights.push_back(2.0);
-//      weights.push_back(1.5);
-//      weights.push_back(2.0);
-//      weights.push_back(0.0); // This is the central pixel
-//      weights.push_back(2.0);
-//      weights.push_back(1.5);
-//      weights.push_back(2.0);
-//      weights.push_back(1.5);
+    //TODO Review how is the matrix neighborhood is build!
+    std::vector< double > weights;
+    weights.push_back(1.5);
+    weights.push_back(2.0);
+    weights.push_back(1.5);
+    weights.push_back(2.0);
+    weights.push_back(0.0); // This is the central pixel
+    weights.push_back(2.0);
+    weights.push_back(1.5);
+    weights.push_back(2.0);
+    weights.push_back(1.5);
 
-//      weights.push_back(1.5);
-//      weights.push_back(2.0);
-//      weights.push_back(1.5);
-//      weights.push_back(2.0);
-//      weights.push_back(0.0); // This is the central pixel
-//      weights.push_back(2.0);
-//      weights.push_back(1.5);
-//      weights.push_back(2.0);
-//      weights.push_back(1.5);
-//      weights.push_back(1.5);
-//      weights.push_back(2.0);
-//      weights.push_back(1.5);
-//      weights.push_back(2.0);
-//      weights.push_back(0.0); // This is the central pixel
-//      weights.push_back(2.0);
-//      weights.push_back(1.5);
-//      weights.push_back(2.0);
-//      weights.push_back(1.5);
+    weights.push_back(1.5);
+    weights.push_back(2.0);
+    weights.push_back(1.5);
+    weights.push_back(2.0);
+    weights.push_back(0.0); // This is the central pixel
+    weights.push_back(2.0);
+    weights.push_back(1.5);
+    weights.push_back(2.0);
+    weights.push_back(1.5);
+    weights.push_back(1.5);
+    weights.push_back(2.0);
+    weights.push_back(1.5);
+    weights.push_back(2.0);
+    weights.push_back(0.0); // This is the central pixel
+    weights.push_back(2.0);
+    weights.push_back(1.5);
+    weights.push_back(2.0);
+    weights.push_back(1.5);
 
-//      double totalWeight = 0;
-//      for(std::vector< double >::const_iterator wcIt = weights.begin();
-//          wcIt != weights.end(); ++wcIt )
-//        {
-//        totalWeight += *wcIt;
-//        }
-//      for(std::vector< double >::iterator wIt = weights.begin();
-//          wIt != weights.end(); ++wIt )
-//        {
-//        *wIt = static_cast< double > ( (*wIt) * meanDistance / (2 * totalWeight));
-//        }
+    double totalWeight = 0;
+    for(std::vector< double >::const_iterator wcIt = weights.begin();
+        wcIt != weights.end(); ++wcIt )
+    {
+        totalWeight += *wcIt;
+    }
+    for(std::vector< double >::iterator wIt = weights.begin();
+        wIt != weights.end(); ++wIt )
+    {
+        *wIt = static_cast< double > ( (*wIt) * meanDistance / (2 * totalWeight));
+    }
 
-//      mrfFilter->SetMRFNeighborhoodWeight( weights );
+    mrfFilter->SetMRFNeighborhoodWeight( weights );
 
-        mrfFilter->SetClassifier( classifier );
+    mrfFilter->SetClassifier( classifier );
 
-      typedef MRFFilterType::OutputImageType  OutputImageType;
-
-
-      // Rescale outputs to the dynamic range of the display
-//      typedef itk::Image< unsigned char, Dimension > RescaledOutputImageType;
-//      typedef itk::RescaleIntensityImageFilter<
-//                 OutputImageType, RescaledOutputImageType >   RescalerType;
-
-//      RescalerType::Pointer intensityRescaler = RescalerType::New();
-//      intensityRescaler->SetOutputMinimum(   0 );
-//      intensityRescaler->SetOutputMaximum( 255 );
-//      intensityRescaler->SetInput( mrfFilter->GetOutput() );
+    typedef MRFFilterType::OutputImageType  OutputImageType;
 
 
-      typedef itk::ImageFileWriter< OutputImageType > WriterType;
+    // Rescale outputs to the dynamic range of the display
+    //      typedef itk::Image< unsigned char, Dimension > RescaledOutputImageType;
+    //      typedef itk::RescaleIntensityImageFilter<
+    //                 OutputImageType, RescaledOutputImageType >   RescalerType;
 
-      WriterType::Pointer writer = WriterType::New();
+    //      RescalerType::Pointer intensityRescaler = RescalerType::New();
+    //      intensityRescaler->SetOutputMinimum(   0 );
+    //      intensityRescaler->SetOutputMaximum( 255 );
+    //      intensityRescaler->SetInput( mrfFilter->GetOutput() );
 
-      writer->SetInput( mrfFilter->GetOutput() );
 
-      writer->SetFileName( outputLabels );
+    typedef itk::ImageFileWriter< OutputImageType > WriterType;
 
-        writer->Update();
-//        }
-//      catch( itk::ExceptionObject & excp )
-//        {
-//        std::cerr << "Problem encountered while writing ";
-//        std::cerr << " image file : " << argv[2] << std::endl;
-//        std::cerr << excp << std::endl;
-//        return EXIT_FAILURE;
-//        }
-//      // Software Guide : EndCodeSnippet
+    WriterType::Pointer writer = WriterType::New();
 
-//      std::cout << "Number of Iterations : ";
-//      std::cout << mrfFilter->GetNumberOfIterations() << std::endl;
-//      std::cout << "Stop condition: " << std::endl;
-//      std::cout << "  (1) Maximum number of iterations " << std::endl;
-//      std::cout << "  (2) Error tolerance:  "  << std::endl;
-//      std::cout << mrfFilter->GetStopCondition() << std::endl;
+    writer->SetInput( mrfFilter->GetOutput() );
+
+    writer->SetFileName( outputLabels );
+
+    writer->Update();
+    //        }
+    //      catch( itk::ExceptionObject & excp )
+    //        {
+    //        std::cerr << "Problem encountered while writing ";
+    //        std::cerr << " image file : " << argv[2] << std::endl;
+    //        std::cerr << excp << std::endl;
+    //        return EXIT_FAILURE;
+    //        }
+    //      // Software Guide : EndCodeSnippet
+
+    //      std::cout << "Number of Iterations : ";
+    //      std::cout << mrfFilter->GetNumberOfIterations() << std::endl;
+    //      std::cout << "Stop condition: " << std::endl;
+    //      std::cout << "  (1) Maximum number of iterations " << std::endl;
+    //      std::cout << "  (2) Error tolerance:  "  << std::endl;
+    //      std::cout << mrfFilter->GetStopCondition() << std::endl;
 
 }
 
@@ -352,4 +410,31 @@ void DTIMapSegmentation::KMeansSegmentation()
     writer->SetFileName( outputLabels );
 
     writer->Update();
+}
+
+void DTIMapSegmentation::ClassicAnisotropicFiltering()
+{
+    typedef float       PixelType;
+    const unsigned int         Dimension = 3;
+    typedef itk::Image<PixelType, Dimension > ImageType;
+    typedef itk::ImageFileReader< ImageType > ReaderType;
+    ReaderType::Pointer reader = ReaderType::New();
+//    stringstream imagePath;
+//    imagePath<<this->folderPath<<"/t1_volume.nii.gz";
+    reader->SetFileName( inputVolume );
+
+    typedef itk::GradientAnisotropicDiffusionImageFilter<ImageType, ImageType> FilterType;
+    FilterType::Pointer filter = FilterType::New();
+    filter->SetInput( reader->GetOutput() );
+    filter->SetConductanceParameter(0.0625);
+    filter->SetNumberOfIterations(this->getNumIter());
+    filter->Update();
+
+//    typedef itk::ImageFileWriter<ImageType> WriterType;
+//    typename WriterType::Pointer writer = WriterType::New();
+//    std::stringstream savePathT1;
+//    savePathT1<<this->folderPath<<"/t1_volume.nii.gz";
+//    writer->SetInput(filter->GetOutput());
+//    writer->SetFileName(savePathT1.str());
+
 }

@@ -14,7 +14,7 @@
 	   <longflag>--outputFolder</longflag>
 	   <label>Output folder</label>
 	   <default>./</default>
-	   <description>![CDATA[Output all images used for MS segmentation process.]]</description>
+	   <description><![CDATA[Output all images used for MS segmentation process.]]></description>
 	</directory>
 	<label>IO</label>
 	   <description><![CDATA[Input/output parameters]]></description>

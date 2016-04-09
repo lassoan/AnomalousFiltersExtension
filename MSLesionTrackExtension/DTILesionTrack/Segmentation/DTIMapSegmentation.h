@@ -22,6 +22,7 @@
 
 //Image filters
 #include "itkGradientAnisotropicDiffusionImageFilter.h"
+#include "itkDiscreteGaussianImageFilter.h"
 using namespace std;
 
 /*
@@ -37,19 +38,37 @@ private:
     const char* inputVolume;
     const char* outputLabels;
     int numClasses;
+    int numIter;
+    bool doFiltering;
     void BayesSegmentation();
     void MRFSegmentation();
     void KMeansSegmentation();
+    void ClassicAnisotropicFiltering();
+    void AnomalousAnisotropicFiltering();
+    void GaussianFiltering();
+    void NonLocalMeansFiltering();
 public:
+    enum filterMethod{
+        ClassicAD,
+        AnomalousAD,
+        NLM,
+        Gaussian
+    };
     enum segMethod{
         MRF,
         BAYES,
         KMEANS
     };
     DTIMapSegmentation(const char *inputVolume, const char *outputLabels);
+    DTIMapSegmentation(const char *inputVolume);
     int getNumClasses() const;
     void setNumClasses(int value);
     void runSegmentation(enum segMethod);
+    void runFiltering(enum filterMethod);
+    int getNumIter() const;
+    void setNumIter(int value);
+    bool getDoFiltering() const;
+    void setDoFiltering(bool value);
 };
 
 #endif

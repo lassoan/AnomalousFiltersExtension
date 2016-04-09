@@ -2,12 +2,12 @@
 <executable>
   <category>Segmentation.MS Lesion Track.Diffusion Image Segmentation</category>
   <title>DTI Lesion Track</title>
-  <description><![CDATA[This is a CLI module that can be bundled in an extension]]></description>
+  <description><![CDATA[This CLI module aims to segment abnormalities voxels from diffusion fractional anisotropy (FA) maps. This tool could be applied to the study of Multiple Sclerosis or other neurodegenerative diseases that affects the brain white matter.]]></description>
   <version>0.0.1</version>
   <documentation-url>http://www.example.com/Slicer/Modules/DTILesionTrack</documentation-url>
   <license>Slicer</license>
-  <contributor>FirstName LastName (Institution), FirstName LastName (Institution)</contributor>
-  <acknowledgements>This work was partially funded by NIH grant NXNNXXNNNNNN-NNXN</acknowledgements>
+  <contributor>Antonio Carlos da S. Senra Filho (University of Sao Paulo), Luiz Otavio Murta Junior (University of Sao Paulo)</contributor>
+  <acknowledgements>This work was partially funded by CNPq grant 201871/2015-7/SWE and CAPES.</acknowledgements>
   <parameters>
     <label>IO</label>
     <description><![CDATA[Input/output parameters]]></description>
@@ -16,22 +16,29 @@
 	   <label>DTI-FA Volume</label>
 	   <channel>input</channel>
 	   <index>0</index>
-	   <description><![CDATA[DTI FA map input volume]]></description>
+	   <description><![CDATA[DTI FA map input volume. Please, provide here a high quality brain extracted and eddy corrected FA map.]]></description>
+	</image>
+	<image type="label">
+	   <name>T1WMMask</name>
+	   <label>White Matter Mask</label>
+	   <channel>input</channel>
+	   <index>1</index>
+	   <description><![CDATA[White matter mask which could be extracted from structural T1 input volume.]]></description>
 	</image>
 	<image type="label">
 	   <name>outputLabels</name>
-	   <label>Lesion Labels</label>
+	   <label>Lesion Label</label>
 	   <channel>output</channel>
-	   <index>1</index>
-	   <description><![CDATA[Output labels Volume]]></description>
+	   <index>2</index>
+	   <description><![CDATA[Output a general label mask which inform the lesions segmented in the white matter.]]></description>
 	</image>
-  </parameters>
+  </parameters>  
   <parameters>
-  <label>Segmentation Parameters</label>
+  <label>Lesion Segmentation Parameters</label>
 	<string-enumeration>
-	      <name>segMethod</name>
-	      <longflag>--segMethod</longflag>
-	      <description><![CDATA[Choose the segmentation method]]></description>
+	      <name>segFAMethod</name>
+	      <longflag>--FASeg</longflag>
+	      <description><![CDATA[Choose the segmentation method to be applied on DTI-FA map]]></description>
 	      <label>Algorithm</label>
 	      <default>MRF</default>
 	      <element>Bayesian</element>
