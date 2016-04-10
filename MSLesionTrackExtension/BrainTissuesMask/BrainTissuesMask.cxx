@@ -1,6 +1,8 @@
 #include "itkImageFileWriter.h"
+#include "itkImage.h"
 
 #include "itkPluginUtilities.h"
+#include "itkCastImageFilter.h"
 #include "itkImageDuplicator.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
@@ -14,10 +16,6 @@
 #include "itkMRFImageFilter.h"
 #include "itkDistanceToCentroidMembershipFunction.h"
 #include "itkMinimumDecisionRule.h"
-
-//Spatial Filters
-#include "itkGradientAnisotropicDiffusionImageFilter.h"
-#include "itkDiscreteGaussianImageFilter.h"
 
 #include "BrainTissuesMaskCLP.h"
 
@@ -34,119 +32,201 @@ int DoIt( int argc, char * argv[], T )
 {
     PARSE_ARGS;
 
-    typedef    T              InputPixelType;
+    typedef    float              InputPixelType;
     typedef    unsigned char  OutputPixelType;
+    const unsigned int                   Dimension=3;
 
-    typedef itk::Image<InputPixelType,  3> InputImageType;
-    typedef itk::Image<OutputPixelType, 3> OutputImageType;
+    typedef itk::Image<InputPixelType,  Dimension> InputImageType;
+    typedef itk::Image<OutputPixelType, Dimension> OutputImageType;
 
     typedef itk::ImageFileReader<InputImageType>    ReaderType;
-    typedef itk::ImageDuplicator<InputImageType>    InputDuplicatorType;
-    typedef itk::ImageDuplicator<OutputImageType>   OutputDuplicatorType;
+    //    typedef itk::CastImageFilter<InputPixelType, float>     CastInputType;
+
 
 
     typename ReaderType::Pointer reader = ReaderType::New();
     reader->SetFileName( inputVolume.c_str() );
     reader->Update();
 
-
-    if (useBrainExtraction) {
-        //TODO Build code to extract the brain in the input volume
-    }
-
-//    InputImageType::Pointer dup_reader = reader->GetOutput();
-//    InputDuplicatorType::Pointer dup_reader = InputDuplicatorType::New();
-//    dup_reader->SetInputImage(reader->GetOutput());
-
-
-    typedef itk::DiscreteGaussianImageFilter<InputImageType, InputImageType> FilterType;
-    typename FilterType::Pointer filter = FilterType::New();
-    filter->SetInput(reader->GetOutput());
-    filter->SetVariance(static_cast<double>(sqrt(2.0*nIter)));
-    filter->Update();
-
-//      if (doSmooth) {
-//          if (filterMethod == "PM") {
-//              typedef itk::GradientAnisotropicDiffusionImageFilter<InputImageType, InputImageType> FilterType;
-//              typename FilterType::Pointer filter = FilterType::New();
-//              filter->SetInput(reader->GetOutput());
-//              filter->SetNumberOfIterations(nIter);
-//              filter->SetTimeStep(0.125);
-//              filter->Update();
-//              dup_reader->SetInputImage(filter->GetOutput());
-//          }else if (filterMethod == "Gaussian") {
-//              typedef itk::RecursiveGaussianImageFilter<InputImageType, InputImageType> FilterType;
-//              typename FilterType::Pointer gauss = FilterType::New();
-//              gauss->SetInput(reader->GetOutput());
-//              gauss->SetSigma(static_cast<double>(sqrt(2.0*nIter)));
-//              gauss->Update();
-//              dup_reader->SetInputImage(gauss->GetOutput());
-//          }
-//      }
-
-
-
     //            Apply segmentation procedure
-    typedef itk::BayesianClassifierInitializationImageFilter< InputImageType >         BayesianInitializerType;
-    typename BayesianInitializerType::Pointer bayesianInitializer = BayesianInitializerType::New();
-
-    bayesianInitializer->SetInput( filter->GetOutput() );
-//      InputImageType::Pointer reader_step2 = dup_reader->GetModifiableOutput();
-//      bayesianInitializer->SetInput( reader_step2 );
-    bayesianInitializer->SetNumberOfClasses( 4 );// Background, WM, GM and CSF
-    bayesianInitializer->Update();
-
-    typedef unsigned char  LabelType;
-    typedef float          PriorType;
-    typedef float          PosteriorType;
-
-    typedef itk::VectorImage< float, 3 > VectorInputImageType;
-    typedef itk::BayesianClassifierImageFilter< VectorInputImageType,LabelType, PosteriorType,PriorType >   ClassifierFilterType;
-    typename ClassifierFilterType::Pointer bayesClassifier = ClassifierFilterType::New();
-
-    bayesClassifier->SetInput( bayesianInitializer->GetOutput() );
+    if (segMethod == "KMeans") {
 
 
+        //K-Means Segmentation Approach
 
-    //    Take only the choosen tissue
-    typename OutputImageType::Pointer tissue = OutputImageType::New();
-    tissue->SetRegions(bayesClassifier->GetOutput()->GetLargestPossibleRegion());
-    tissue->Allocate();
+        std::cerr << " inputScalarImage outputLabeledImage nonContiguousLabels";
+        std::cerr << " numberOfClasses mean1 mean2... meanN " << std::endl;
 
-    typedef itk::ImageRegionConstIterator<OutputImageType> ConstIteratorType;
-    typedef itk::ImageRegionIterator<OutputImageType>       IteratorType;
-    ConstIteratorType allTissues(bayesClassifier->GetOutput(), bayesClassifier->GetOutput()->GetLargestPossibleRegion());
-    IteratorType oneTissue(tissue, bayesClassifier->GetOutput()->GetLargestPossibleRegion());
-    unsigned int tissueType;
-    if (typeTissue == "White Matter") {
-        tissueType = 3;
-    }else if (typeTissue == "Gray Matter") {
-        tissueType = 2;
-    }else if (typeTissue == "CSF") {
-        tissueType = 1;
-    }
+        typedef itk::ScalarImageKmeansImageFilter< InputImageType > KMeansFilterType;
+        KMeansFilterType::Pointer kmeansFilter = KMeansFilterType::New();
+        kmeansFilter->SetInput( reader->GetOutput() );
+        const unsigned int numberOfInitialClasses = numClass;
 
-    allTissues.GoToBegin();
-    oneTissue.GoToBegin();
-    while (!allTissues.IsAtEnd()) {
-        if (allTissues.Get()==tissueType) {
-            oneTissue.Set(allTissues.Get());
-        }else{
-        oneTissue.Set(0);
+
+        //      const unsigned int useNonContiguousLabels = atoi( argv[3] );
+        //      kmeansFilter->SetUseNonContiguousLabels( useNonContiguousLabels );
+
+        //      const unsigned int argoffset = 5;
+        //      if( static_cast<unsigned int>(argc) <
+        //          numberOfInitialClasses + argoffset )
+        //        {
+        //        std::cerr << "Error: " << std::endl;
+        //        std::cerr << numberOfInitialClasses << " classes has been specified ";
+        //        std::cerr << "but no enough means have been provided in the command ";
+        //        std::cerr << "line arguments " << std::endl;
+        //        return EXIT_FAILURE;
+        //        }
+
+        //      std::vector<unsigned int> means;
+        double means [numClass];
+        for( unsigned k=0; k < numberOfInitialClasses; k++ )
+        {
+            //        const double userProvidedInitialMean = atof( argv[k+argoffset] );
+            //        means[k]=
+            //        kmeansFilter->AddClassWithInitialMean( userProvidedInitialMean );
+            kmeansFilter->AddClassWithInitialMean(meanGuess[k]);
         }
-        ++allTissues;
-        ++oneTissue;
+
+        if (oneTissue) {
+            typedef KMeansFilterType::OutputImageType            TissueType;
+//            typename TissueType::Pointer tissue = TissueType::New();
+            typename TissueType::Pointer tissue = kmeansFilter->GetOutput();
+
+            typedef itk::ImageDuplicator<TissueType> DuplicatorType;
+            DuplicatorType::Pointer clone = DuplicatorType::New();
+            clone->SetInputImage(tissue);
+            clone->Update();
+            typename TissueType::Pointer outLabel = clone->GetModifiableOutput();
+
+            //        tissue->CopyInformation(kmeansFilter->GetOutput());
+//            tissue->SetBufferedRegion(kmeansFilter->GetOutput()->GetBufferedRegion());
+//            tissue->SetRequestedRegion(kmeansFilter->GetOutput()->GetRequestedRegion());
+//            tissue->Allocate();
+            typedef itk::ImageRegionConstIterator<TissueType> ConstIteratorType;
+            typedef itk::ImageRegionIterator<TissueType>       IteratorType;
+            ConstIteratorType allTissues(kmeansFilter->GetOutput(), kmeansFilter->GetOutput()->GetBufferedRegion());
+            IteratorType oneTissue(outLabel, outLabel->GetBufferedRegion());
+            unsigned int tissueType;
+            if (typeTissue == "White Matter") {
+                tissueType = 3;
+            }else if (typeTissue == "Gray Matter") {
+                tissueType = 2;
+            }else if (typeTissue == "CSF") {
+                tissueType = 1;
+            }
+
+            allTissues.GoToBegin();
+            oneTissue.GoToBegin();
+            while (!allTissues.IsAtEnd()) {
+                if (allTissues.Get()==tissueType) {
+                    oneTissue.Set(allTissues.Get());
+                }else{
+                    oneTissue.Set(0);
+                }
+                ++allTissues;
+                ++oneTissue;
+            }
+
+            typedef itk::ImageFileWriter<KMeansFilterType::OutputImageType> WriterType;
+            typename WriterType::Pointer writer = WriterType::New();
+            writer->SetFileName( outputLabel.c_str() );
+            writer->SetInput( outLabel);
+            writer->SetUseCompression(1);
+            writer->Update();
+            return EXIT_SUCCESS;
+        }else{
+            //        Take all the tissues segmented
+            typedef KMeansFilterType::OutputImageType  OutputImageType;
+            typedef itk::ImageFileWriter< OutputImageType > WriterType;
+            WriterType::Pointer writer = WriterType::New();
+            writer->SetInput( kmeansFilter->GetOutput() );
+            writer->SetUseCompression(1);
+            writer->SetFileName( outputLabel );
+            writer->Update();
+            return EXIT_SUCCESS;
+        }
+
+    }else if (segMethod == "Bayesian") {
+        //Bayesian Segmentation Approach
+        typedef itk::BayesianClassifierInitializationImageFilter< InputImageType >         BayesianInitializerType;
+        typename BayesianInitializerType::Pointer bayesianInitializer = BayesianInitializerType::New();
+
+        bayesianInitializer->SetInput( reader->GetOutput() );
+        bayesianInitializer->SetNumberOfClasses( numClass );// Background, WM, GM and CSF
+        bayesianInitializer->Update();
+
+        typedef unsigned char  LabelType;
+        typedef float          PriorType;
+        typedef float          PosteriorType;
+
+        typedef itk::VectorImage< InputPixelType, 3 > VectorInputImageType;
+        typedef itk::BayesianClassifierImageFilter< VectorInputImageType,LabelType, PosteriorType,PriorType >   ClassifierFilterType;
+        typename ClassifierFilterType::Pointer bayesClassifier = ClassifierFilterType::New();
+
+        bayesClassifier->SetInput( bayesianInitializer->GetOutput() );
+
+        if (oneTissue) {
+            typedef ClassifierFilterType::OutputImageType            TissueType;
+            typename TissueType::Pointer tissue = TissueType::New();
+            //        tissue->CopyInformation(bayesClassifier->GetOutput());
+            tissue->SetBufferedRegion(bayesClassifier->GetOutput()->GetBufferedRegion());
+            tissue->SetRequestedRegion(bayesClassifier->GetOutput()->GetRequestedRegion());
+            tissue->Allocate();
+            //        typedef itk::ImageRegionConstIterator<TissueType> ConstIteratorType;
+            //        typedef itk::ImageRegionIterator<TissueType>       IteratorType;
+            //        ConstIteratorType allTissues(bayesClassifier->GetOutput(), bayesClassifier->GetOutput()->GetBufferedRegion());
+            //        IteratorType oneTissue(tissue, tissue->GetBufferedRegion());
+            //        unsigned int tissueType;
+            //        if (typeTissue == "White Matter") {
+            //            tissueType = 3;
+            //        }else if (typeTissue == "Gray Matter") {
+            //            tissueType = 2;
+            //        }else if (typeTissue == "CSF") {
+            //            tissueType = 1;
+            //        }
+
+            //        allTissues.GoToBegin();
+            //        oneTissue.GoToBegin();
+            //        while (!allTissues.IsAtEnd()) {
+            //            if (allTissues.Get()==tissueType) {
+            //                oneTissue.Set(allTissues.Get());
+            //            }else{
+            //            oneTissue.Set(0);
+            //            }
+            //            ++allTissues;
+            //            ++oneTissue;
+            //        }
+
+            //            typedef itk::ImageFileWriter<ClassifierFilterType::OutputImageType> WriterType;
+            //            typename WriterType::Pointer writer = WriterType::New();
+            //            writer->SetFileName( outputLabel.c_str() );
+            //            writer->SetInput( bayesClassifier->GetOutput() );
+            //            writer->SetUseCompression(1);
+            //            writer->Update();
+            //            return EXIT_SUCCESS;
+        }else{
+            //        Take all the tissues segmented
+            typedef itk::ImageFileWriter<ClassifierFilterType::OutputImageType> WriterType;
+            typename WriterType::Pointer writer = WriterType::New();
+            writer->SetFileName( outputLabel.c_str() );
+            writer->SetInput( bayesClassifier->GetOutput() );
+            writer->SetUseCompression(1);
+            writer->Update();
+            return EXIT_SUCCESS;
+        }
+
+        //        typedef itk::ImageFileWriter<ClassifierFilterType::OutputImageType> WriterType;
+        //        typename WriterType::Pointer writer = WriterType::New();
+        //        writer->SetFileName( outputLabel.c_str() );
+        //        writer->SetInput( bayesClassifier->GetOutput() );
+        //        writer->SetUseCompression(1);
+        //        writer->Update();
+
+        //        return EXIT_SUCCESS;
+    }else if (segMethod == "MRF") {
+        //Markov Random Field Segmentation Method
     }
 
-    typedef itk::ImageFileWriter<ClassifierFilterType::OutputImageType> WriterType;
-    typename WriterType::Pointer writer = WriterType::New();
-    writer->SetFileName( outputLabel.c_str() );
-//    writer->SetInput( tissue );
-    writer->SetInput( bayesClassifier->GetOutput() );
-    writer->SetUseCompression(1);
-    writer->Update();
-
-    return EXIT_SUCCESS;
 }
 
 } // end of anonymous namespace
