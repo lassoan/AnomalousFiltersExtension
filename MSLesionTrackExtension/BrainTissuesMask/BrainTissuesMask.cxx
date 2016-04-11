@@ -4,6 +4,7 @@
 #include "itkPluginUtilities.h"
 #include "itkCastImageFilter.h"
 #include "itkImageDuplicator.h"
+#include "itkRescaleIntensityImageFilter.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
 
@@ -32,17 +33,14 @@ int DoIt( int argc, char * argv[], T )
 {
     PARSE_ARGS;
 
-    typedef    float              InputPixelType;
-    typedef    unsigned char  OutputPixelType;
+    typedef    float                    InputPixelType;
+    typedef    unsigned char            OutputPixelType;
     const unsigned int                   Dimension=3;
 
     typedef itk::Image<InputPixelType,  Dimension> InputImageType;
     typedef itk::Image<OutputPixelType, Dimension> OutputImageType;
 
     typedef itk::ImageFileReader<InputImageType>    ReaderType;
-    //    typedef itk::CastImageFilter<InputPixelType, float>     CastInputType;
-
-
 
     typename ReaderType::Pointer reader = ReaderType::New();
     reader->SetFileName( inputVolume.c_str() );
@@ -50,75 +48,42 @@ int DoIt( int argc, char * argv[], T )
 
     //            Apply segmentation procedure
     if (segMethod == "KMeans") {
-
-
         //K-Means Segmentation Approach
-
-        std::cerr << " inputScalarImage outputLabeledImage nonContiguousLabels";
-        std::cerr << " numberOfClasses mean1 mean2... meanN " << std::endl;
-
         typedef itk::ScalarImageKmeansImageFilter< InputImageType > KMeansFilterType;
         KMeansFilterType::Pointer kmeansFilter = KMeansFilterType::New();
         kmeansFilter->SetInput( reader->GetOutput() );
         const unsigned int numberOfInitialClasses = numClass;
 
-
-        //      const unsigned int useNonContiguousLabels = atoi( argv[3] );
-        //      kmeansFilter->SetUseNonContiguousLabels( useNonContiguousLabels );
-
-        //      const unsigned int argoffset = 5;
-        //      if( static_cast<unsigned int>(argc) <
-        //          numberOfInitialClasses + argoffset )
-        //        {
-        //        std::cerr << "Error: " << std::endl;
-        //        std::cerr << numberOfInitialClasses << " classes has been specified ";
-        //        std::cerr << "but no enough means have been provided in the command ";
-        //        std::cerr << "line arguments " << std::endl;
-        //        return EXIT_FAILURE;
-        //        }
-
-        //      std::vector<unsigned int> means;
-        double means [numClass];
         for( unsigned k=0; k < numberOfInitialClasses; k++ )
         {
             //        const double userProvidedInitialMean = atof( argv[k+argoffset] );
-            //        means[k]=
             //        kmeansFilter->AddClassWithInitialMean( userProvidedInitialMean );
             kmeansFilter->AddClassWithInitialMean(meanGuess[k]);
         }
 
         if (oneTissue) {
-            typedef KMeansFilterType::OutputImageType            TissueType;
-//            typename TissueType::Pointer tissue = TissueType::New();
-            typename TissueType::Pointer tissue = kmeansFilter->GetOutput();
+            typename OutputImageType::Pointer outLabel = OutputImageType::New();
+            outLabel->SetBufferedRegion( reader->GetOutput()->GetBufferedRegion() );
+            outLabel->SetRequestedRegion( reader->GetOutput()->GetRequestedRegion() );
+            outLabel->Allocate();
 
-            typedef itk::ImageDuplicator<TissueType> DuplicatorType;
-            DuplicatorType::Pointer clone = DuplicatorType::New();
-            clone->SetInputImage(tissue);
-            clone->Update();
-            typename TissueType::Pointer outLabel = clone->GetModifiableOutput();
-
-            //        tissue->CopyInformation(kmeansFilter->GetOutput());
-//            tissue->SetBufferedRegion(kmeansFilter->GetOutput()->GetBufferedRegion());
-//            tissue->SetRequestedRegion(kmeansFilter->GetOutput()->GetRequestedRegion());
-//            tissue->Allocate();
-            typedef itk::ImageRegionConstIterator<TissueType> ConstIteratorType;
-            typedef itk::ImageRegionIterator<TissueType>       IteratorType;
-            ConstIteratorType allTissues(kmeansFilter->GetOutput(), kmeansFilter->GetOutput()->GetBufferedRegion());
-            IteratorType oneTissue(outLabel, outLabel->GetBufferedRegion());
-            unsigned int tissueType;
+            typedef itk::ImageRegionConstIterator<KMeansFilterType::OutputImageType> ConstIteratorType;
+            typedef itk::ImageRegionIterator<OutputImageType>       IteratorType;
+            ConstIteratorType allTissues(kmeansFilter->GetOutput(), kmeansFilter->GetOutput()->GetRequestedRegion());
+            IteratorType oneTissue(outLabel, outLabel->GetRequestedRegion());
+            unsigned char tissueValue;
             if (typeTissue == "White Matter") {
-                tissueType = 3;
+                tissueValue = 3;
             }else if (typeTissue == "Gray Matter") {
-                tissueType = 2;
+                tissueValue = 2;
             }else if (typeTissue == "CSF") {
-                tissueType = 1;
+                tissueValue = 1;
             }
 
             allTissues.GoToBegin();
             oneTissue.GoToBegin();
             while (!allTissues.IsAtEnd()) {
-                if (allTissues.Get()==tissueType) {
+                if (allTissues.Get()==tissueValue) {
                     oneTissue.Set(allTissues.Get());
                 }else{
                     oneTissue.Set(0);
@@ -127,15 +92,15 @@ int DoIt( int argc, char * argv[], T )
                 ++oneTissue;
             }
 
-            typedef itk::ImageFileWriter<KMeansFilterType::OutputImageType> WriterType;
+            typedef itk::ImageFileWriter<OutputImageType> WriterType;
             typename WriterType::Pointer writer = WriterType::New();
             writer->SetFileName( outputLabel.c_str() );
-            writer->SetInput( outLabel);
+            writer->SetInput( outLabel );
             writer->SetUseCompression(1);
             writer->Update();
             return EXIT_SUCCESS;
         }else{
-            //        Take all the tissues segmented
+            //        Take all the segmented tissues
             typedef KMeansFilterType::OutputImageType  OutputImageType;
             typedef itk::ImageFileWriter< OutputImageType > WriterType;
             WriterType::Pointer writer = WriterType::New();
@@ -159,51 +124,117 @@ int DoIt( int argc, char * argv[], T )
         typedef float          PriorType;
         typedef float          PosteriorType;
 
-        typedef itk::VectorImage< InputPixelType, 3 > VectorInputImageType;
+        typedef itk::VectorImage< InputPixelType, Dimension > VectorInputImageType;
         typedef itk::BayesianClassifierImageFilter< VectorInputImageType,LabelType, PosteriorType,PriorType >   ClassifierFilterType;
         typename ClassifierFilterType::Pointer bayesClassifier = ClassifierFilterType::New();
 
         bayesClassifier->SetInput( bayesianInitializer->GetOutput() );
 
         if (oneTissue) {
-            typedef ClassifierFilterType::OutputImageType            TissueType;
-            typename TissueType::Pointer tissue = TissueType::New();
-            //        tissue->CopyInformation(bayesClassifier->GetOutput());
-            tissue->SetBufferedRegion(bayesClassifier->GetOutput()->GetBufferedRegion());
-            tissue->SetRequestedRegion(bayesClassifier->GetOutput()->GetRequestedRegion());
-            tissue->Allocate();
-            //        typedef itk::ImageRegionConstIterator<TissueType> ConstIteratorType;
-            //        typedef itk::ImageRegionIterator<TissueType>       IteratorType;
-            //        ConstIteratorType allTissues(bayesClassifier->GetOutput(), bayesClassifier->GetOutput()->GetBufferedRegion());
-            //        IteratorType oneTissue(tissue, tissue->GetBufferedRegion());
-            //        unsigned int tissueType;
-            //        if (typeTissue == "White Matter") {
-            //            tissueType = 3;
-            //        }else if (typeTissue == "Gray Matter") {
-            //            tissueType = 2;
-            //        }else if (typeTissue == "CSF") {
-            //            tissueType = 1;
-            //        }
+            typename OutputImageType::Pointer outLabel = OutputImageType::New();
+            outLabel->SetBufferedRegion( reader->GetOutput()->GetBufferedRegion() );
+            outLabel->SetRequestedRegion( reader->GetOutput()->GetRequestedRegion() );
+            outLabel->Allocate();
 
-            //        allTissues.GoToBegin();
-            //        oneTissue.GoToBegin();
-            //        while (!allTissues.IsAtEnd()) {
-            //            if (allTissues.Get()==tissueType) {
-            //                oneTissue.Set(allTissues.Get());
-            //            }else{
-            //            oneTissue.Set(0);
-            //            }
-            //            ++allTissues;
-            //            ++oneTissue;
-            //        }
+            typedef itk::ImageRegionConstIterator<ClassifierFilterType::OutputImageType> ConstIteratorType;
+            typedef itk::ImageRegionIterator<OutputImageType>       IteratorType;
+            ConstIteratorType allTissues(bayesClassifier->GetOutput(), bayesClassifier->GetOutput()->GetBufferedRegion());
+            IteratorType oneTissue(outLabel, outLabel->GetBufferedRegion());
+            unsigned char tissueValue;
+            if (typeTissue == "White Matter") {
+                tissueValue = 3;
+            }else if (typeTissue == "Gray Matter") {
+                tissueValue = 2;
+            }else if (typeTissue == "CSF") {
+                tissueValue = 1;
+            }
 
-            //            typedef itk::ImageFileWriter<ClassifierFilterType::OutputImageType> WriterType;
-            //            typename WriterType::Pointer writer = WriterType::New();
-            //            writer->SetFileName( outputLabel.c_str() );
-            //            writer->SetInput( bayesClassifier->GetOutput() );
-            //            writer->SetUseCompression(1);
-            //            writer->Update();
-            //            return EXIT_SUCCESS;
+            allTissues.GoToBegin();
+            oneTissue.GoToBegin();
+            while (!allTissues.IsAtEnd()) {
+                if (allTissues.Get()==tissueValue) {
+                    oneTissue.Set(allTissues.Get());
+                }else{
+                    oneTissue.Set(0);
+                }
+                ++allTissues;
+                ++oneTissue;
+            }
+
+            typedef itk::ImageFileWriter<OutputImageType> WriterType;
+            typename WriterType::Pointer writer = WriterType::New();
+            writer->SetFileName( outputLabel.c_str() );
+            writer->SetInput( outLabel );
+            writer->SetUseCompression(1);
+            writer->Update();
+            return EXIT_SUCCESS;
+
+
+
+
+
+
+
+
+
+            //            typedef ClassifierFilterType::OutputImageType            TissueType;
+            //            typedef itk::Image<TissueType::InternalPixelType, Dimension> ExtractImage;
+            //            typename ExtractImage::Pointer tissue = ExtractImage::New();
+            //                    tissue->CopyInformation(bayesClassifier->GetOutput());
+            //            tissue->SetBufferedRegion(bayesClassifier->GetOutput()->GetBufferedRegion());
+            //            tissue->SetRequestedRegion(bayesClassifier->GetOutput()->GetRequestedRegion());
+            //            tissue->Allocate();
+            //                    typedef itk::ImageRegionConstIterator<TissueType> ConstIteratorType;
+            //                    typedef itk::ImageRegionIterator<ExtractImage>       IteratorType;
+            //                    ConstIteratorType allTissues(bayesClassifier->GetOutput(), bayesClassifier->GetOutput()->GetBufferedRegion());
+            //                    IteratorType oneTissue(tissue, tissue->GetLargestPossibleRegion());
+            //                    unsigned int tissueType;
+            //                    if (typeTissue == "White Matter") {
+            //                        tissueType = 3;
+            //                    }else if (typeTissue == "Gray Matter") {
+            //                        tissueType = 2;
+            //                    }else if (typeTissue == "CSF") {
+            //                        tissueType = 1;
+            //                    }
+
+            //                    allTissues.GoToBegin();
+            //                    oneTissue.GoToBegin();
+            //                    while (!allTissues.IsAtEnd()) {
+            //                        if (allTissues.Get()==tissueType) {
+            //                            oneTissue.Set(allTissues.Get());
+            //                        }else{
+            //                        oneTissue.Set(0);
+            //                        }
+            //                        ++allTissues;
+            //                        ++oneTissue;
+            //                    }
+
+            //                    typedef itk::Image< unsigned char, Dimension > OutputImageType;
+            //                    typedef itk::RescaleIntensityImageFilter<
+            //                      ExtractImage, OutputImageType > RescalerType;
+            //                    RescalerType::Pointer rescaler = RescalerType::New();
+            //                    rescaler->SetInput( tissue );
+            //                    rescaler->SetOutputMinimum( 0 );
+            //                    rescaler->SetOutputMaximum( 255 );
+            //                    typedef itk::ImageFileWriter<  OutputImageType
+            //                                        >  ExtractedComponentWriterType;
+            //                    ExtractedComponentWriterType::Pointer
+            //                               rescaledImageWriter = ExtractedComponentWriterType::New();
+            //                    rescaledImageWriter->SetInput( rescaler->GetOutput() );
+            //                    rescaledImageWriter->SetFileName( outputLabel.c_str() );
+            //                    rescaledImageWriter->Update();
+
+
+
+
+
+            //                        typedef itk::ImageFileWriter<ClassifierFilterType::OutputImageType> WriterType;
+            //                        typename WriterType::Pointer writer = WriterType::New();
+            //                        writer->SetFileName( outputLabel.c_str() );
+            //                        writer->SetInput( bayesClassifier->GetOutput() );
+            //                        writer->SetUseCompression(1);
+            //                        writer->Update();
+//            return EXIT_SUCCESS;
         }else{
             //        Take all the tissues segmented
             typedef itk::ImageFileWriter<ClassifierFilterType::OutputImageType> WriterType;
