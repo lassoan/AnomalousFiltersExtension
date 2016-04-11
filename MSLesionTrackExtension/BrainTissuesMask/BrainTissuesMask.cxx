@@ -1,12 +1,17 @@
 #include "itkImageFileWriter.h"
 #include "itkImage.h"
+#include "itkVector.h"
+#include "itkListSample.h"
+#include "itkGaussianMixtureModelComponent.h"
+#include "itkExpectationMaximizationMixtureModelEstimator.h"
+#include "itkNormalVariateGenerator.h"
+
 
 #include "itkPluginUtilities.h"
-#include "itkCastImageFilter.h"
-#include "itkImageDuplicator.h"
-#include "itkRescaleIntensityImageFilter.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
+#include "itkThresholdImageFilter.h"
+#include "itkComposeImageFilter.h"
 
 //Segmentation Methods
 #include "itkBayesianClassifierImageFilter.h"
@@ -35,7 +40,7 @@ int DoIt( int argc, char * argv[], T )
 
     typedef    float                    InputPixelType;
     typedef    unsigned char            OutputPixelType;
-    const unsigned int                   Dimension=3;
+    const unsigned int                  Dimension=3;
 
     typedef itk::Image<InputPixelType,  Dimension> InputImageType;
     typedef itk::Image<OutputPixelType, Dimension> OutputImageType;
@@ -45,6 +50,31 @@ int DoIt( int argc, char * argv[], T )
     typename ReaderType::Pointer reader = ReaderType::New();
     reader->SetFileName( inputVolume.c_str() );
     reader->Update();
+
+//TODO Finish the automatic mean value guess part
+//    double meanValues[numClass] = meanGuess;
+//    if (guessMeans) {
+//        // Estimating the initial mean values
+//        typedef itk::ScalarImageKmeansImageFilter< InputImageType > KMeansFilterType;
+//        KMeansFilterType::Pointer kmeansFilter = KMeansFilterType::New();
+//        kmeansFilter->SetInput( reader->GetOutput() );
+//        const unsigned int numberOfInitialClasses = numClass;
+
+//        for( unsigned k=0; k < numberOfInitialClasses; k++ )
+//        {
+//            kmeansFilter->AddClassWithInitialMean(meanGuess[k]);
+//        }
+
+//        kmeansFilter->Update();
+
+//        KMeansFilterType::ParametersType estimatedMeans = kmeansFilter->GetFinalMeans();
+//        const unsigned int numberOfClasses = estimatedMeans.Size();
+//        for ( unsigned int i = 0; i < numberOfClasses; ++i )
+//        {
+//            meanValues[i] = estimatedMeans[i];
+//        }
+//    }
+
 
     //            Apply segmentation procedure
     if (segMethod == "KMeans") {
@@ -56,22 +86,13 @@ int DoIt( int argc, char * argv[], T )
 
         for( unsigned k=0; k < numberOfInitialClasses; k++ )
         {
-            //        const double userProvidedInitialMean = atof( argv[k+argoffset] );
-            //        kmeansFilter->AddClassWithInitialMean( userProvidedInitialMean );
             kmeansFilter->AddClassWithInitialMean(meanGuess[k]);
         }
 
-        if (oneTissue) {
-            typename OutputImageType::Pointer outLabel = OutputImageType::New();
-            outLabel->SetBufferedRegion( reader->GetOutput()->GetBufferedRegion() );
-            outLabel->SetRequestedRegion( reader->GetOutput()->GetRequestedRegion() );
-            outLabel->Allocate();
+        kmeansFilter->Update();
 
-            typedef itk::ImageRegionConstIterator<KMeansFilterType::OutputImageType> ConstIteratorType;
-            typedef itk::ImageRegionIterator<OutputImageType>       IteratorType;
-            ConstIteratorType allTissues(kmeansFilter->GetOutput(), kmeansFilter->GetOutput()->GetRequestedRegion());
-            IteratorType oneTissue(outLabel, outLabel->GetRequestedRegion());
-            unsigned char tissueValue;
+        if (oneTissue) {
+            KMeansFilterType::OutputImagePixelType tissueValue;
             if (typeTissue == "White Matter") {
                 tissueValue = 3;
             }else if (typeTissue == "Gray Matter") {
@@ -80,33 +101,45 @@ int DoIt( int argc, char * argv[], T )
                 tissueValue = 1;
             }
 
-            allTissues.GoToBegin();
-            oneTissue.GoToBegin();
-            while (!allTissues.IsAtEnd()) {
-                if (allTissues.Get()==tissueValue) {
-                    oneTissue.Set(allTissues.Get());
-                }else{
-                    oneTissue.Set(0);
-                }
-                ++allTissues;
-                ++oneTissue;
+            typedef itk::ThresholdImageFilter <OutputImageType>     ThresholdImageFilterType;
+            typename  ThresholdImageFilterType::Pointer thresholdFilter  = ThresholdImageFilterType::New();
+            thresholdFilter->SetInput(kmeansFilter->GetOutput());
+            thresholdFilter->ThresholdOutside(tissueValue, tissueValue);
+            thresholdFilter->SetOutsideValue(0);
+
+            KMeansFilterType::ParametersType estimatedMeans =
+                    kmeansFilter->GetFinalMeans();
+            const unsigned int numberOfClasses = estimatedMeans.Size();
+            for ( unsigned int i = 0; i < numberOfClasses; ++i )
+            {
+                std::cout << "cluster[" << i << "] ";
+                std::cout << "    estimated mean : " << estimatedMeans[i] << std::endl;
             }
 
             typedef itk::ImageFileWriter<OutputImageType> WriterType;
             typename WriterType::Pointer writer = WriterType::New();
             writer->SetFileName( outputLabel.c_str() );
-            writer->SetInput( outLabel );
+            writer->SetInput( thresholdFilter->GetOutput() );
             writer->SetUseCompression(1);
             writer->Update();
             return EXIT_SUCCESS;
         }else{
             //        Take all the segmented tissues
+            KMeansFilterType::ParametersType estimatedMeans =
+                    kmeansFilter->GetFinalMeans();
+            const unsigned int numberOfClasses = estimatedMeans.Size();
+            for ( unsigned int i = 0; i < numberOfClasses; ++i )
+            {
+                std::cout << "cluster[" << i << "] ";
+                std::cout << "    estimated mean : " << estimatedMeans[i] << std::endl;
+            }
+
             typedef KMeansFilterType::OutputImageType  OutputImageType;
             typedef itk::ImageFileWriter< OutputImageType > WriterType;
             WriterType::Pointer writer = WriterType::New();
             writer->SetInput( kmeansFilter->GetOutput() );
             writer->SetUseCompression(1);
-            writer->SetFileName( outputLabel );
+            writer->SetFileName( outputLabel.c_str() );
             writer->Update();
             return EXIT_SUCCESS;
         }
@@ -131,15 +164,6 @@ int DoIt( int argc, char * argv[], T )
         bayesClassifier->SetInput( bayesianInitializer->GetOutput() );
 
         if (oneTissue) {
-            typename OutputImageType::Pointer outLabel = OutputImageType::New();
-            outLabel->SetBufferedRegion( reader->GetOutput()->GetBufferedRegion() );
-            outLabel->SetRequestedRegion( reader->GetOutput()->GetRequestedRegion() );
-            outLabel->Allocate();
-
-            typedef itk::ImageRegionConstIterator<ClassifierFilterType::OutputImageType> ConstIteratorType;
-            typedef itk::ImageRegionIterator<OutputImageType>       IteratorType;
-            ConstIteratorType allTissues(bayesClassifier->GetOutput(), bayesClassifier->GetOutput()->GetBufferedRegion());
-            IteratorType oneTissue(outLabel, outLabel->GetBufferedRegion());
             unsigned char tissueValue;
             if (typeTissue == "White Matter") {
                 tissueValue = 3;
@@ -149,92 +173,19 @@ int DoIt( int argc, char * argv[], T )
                 tissueValue = 1;
             }
 
-            allTissues.GoToBegin();
-            oneTissue.GoToBegin();
-            while (!allTissues.IsAtEnd()) {
-                if (allTissues.Get()==tissueValue) {
-                    oneTissue.Set(allTissues.Get());
-                }else{
-                    oneTissue.Set(0);
-                }
-                ++allTissues;
-                ++oneTissue;
-            }
+            typedef itk::ThresholdImageFilter<OutputImageType> ThresholdType;
+            typename ThresholdType::Pointer thresholder = ThresholdType::New();
+            thresholder->SetInput(bayesClassifier->GetOutput());
+            thresholder->ThresholdOutside(tissueValue, tissueValue);
+            thresholder->SetOutsideValue(0);
 
             typedef itk::ImageFileWriter<OutputImageType> WriterType;
             typename WriterType::Pointer writer = WriterType::New();
             writer->SetFileName( outputLabel.c_str() );
-            writer->SetInput( outLabel );
+            writer->SetInput( thresholder->GetOutput() );
             writer->SetUseCompression(1);
             writer->Update();
             return EXIT_SUCCESS;
-
-
-
-
-
-
-
-
-
-            //            typedef ClassifierFilterType::OutputImageType            TissueType;
-            //            typedef itk::Image<TissueType::InternalPixelType, Dimension> ExtractImage;
-            //            typename ExtractImage::Pointer tissue = ExtractImage::New();
-            //                    tissue->CopyInformation(bayesClassifier->GetOutput());
-            //            tissue->SetBufferedRegion(bayesClassifier->GetOutput()->GetBufferedRegion());
-            //            tissue->SetRequestedRegion(bayesClassifier->GetOutput()->GetRequestedRegion());
-            //            tissue->Allocate();
-            //                    typedef itk::ImageRegionConstIterator<TissueType> ConstIteratorType;
-            //                    typedef itk::ImageRegionIterator<ExtractImage>       IteratorType;
-            //                    ConstIteratorType allTissues(bayesClassifier->GetOutput(), bayesClassifier->GetOutput()->GetBufferedRegion());
-            //                    IteratorType oneTissue(tissue, tissue->GetLargestPossibleRegion());
-            //                    unsigned int tissueType;
-            //                    if (typeTissue == "White Matter") {
-            //                        tissueType = 3;
-            //                    }else if (typeTissue == "Gray Matter") {
-            //                        tissueType = 2;
-            //                    }else if (typeTissue == "CSF") {
-            //                        tissueType = 1;
-            //                    }
-
-            //                    allTissues.GoToBegin();
-            //                    oneTissue.GoToBegin();
-            //                    while (!allTissues.IsAtEnd()) {
-            //                        if (allTissues.Get()==tissueType) {
-            //                            oneTissue.Set(allTissues.Get());
-            //                        }else{
-            //                        oneTissue.Set(0);
-            //                        }
-            //                        ++allTissues;
-            //                        ++oneTissue;
-            //                    }
-
-            //                    typedef itk::Image< unsigned char, Dimension > OutputImageType;
-            //                    typedef itk::RescaleIntensityImageFilter<
-            //                      ExtractImage, OutputImageType > RescalerType;
-            //                    RescalerType::Pointer rescaler = RescalerType::New();
-            //                    rescaler->SetInput( tissue );
-            //                    rescaler->SetOutputMinimum( 0 );
-            //                    rescaler->SetOutputMaximum( 255 );
-            //                    typedef itk::ImageFileWriter<  OutputImageType
-            //                                        >  ExtractedComponentWriterType;
-            //                    ExtractedComponentWriterType::Pointer
-            //                               rescaledImageWriter = ExtractedComponentWriterType::New();
-            //                    rescaledImageWriter->SetInput( rescaler->GetOutput() );
-            //                    rescaledImageWriter->SetFileName( outputLabel.c_str() );
-            //                    rescaledImageWriter->Update();
-
-
-
-
-
-            //                        typedef itk::ImageFileWriter<ClassifierFilterType::OutputImageType> WriterType;
-            //                        typename WriterType::Pointer writer = WriterType::New();
-            //                        writer->SetFileName( outputLabel.c_str() );
-            //                        writer->SetInput( bayesClassifier->GetOutput() );
-            //                        writer->SetUseCompression(1);
-            //                        writer->Update();
-//            return EXIT_SUCCESS;
         }else{
             //        Take all the tissues segmented
             typedef itk::ImageFileWriter<ClassifierFilterType::OutputImageType> WriterType;
@@ -245,19 +196,153 @@ int DoIt( int argc, char * argv[], T )
             writer->Update();
             return EXIT_SUCCESS;
         }
-
-        //        typedef itk::ImageFileWriter<ClassifierFilterType::OutputImageType> WriterType;
-        //        typename WriterType::Pointer writer = WriterType::New();
-        //        writer->SetFileName( outputLabel.c_str() );
-        //        writer->SetInput( bayesClassifier->GetOutput() );
-        //        writer->SetUseCompression(1);
-        //        writer->Update();
-
-        //        return EXIT_SUCCESS;
     }else if (segMethod == "MRF") {
         //Markov Random Field Segmentation Method
-    }
+        typedef itk::FixedArray<InputPixelType,1>  ArrayPixelType;
+        typedef itk::Image< ArrayPixelType, Dimension > ArrayImageType;
+        typedef itk::ComposeImageFilter< InputImageType, ArrayImageType > ScalarToArrayFilterType;
 
+        ScalarToArrayFilterType::Pointer  scalarToArrayFilter = ScalarToArrayFilterType::New();
+        scalarToArrayFilter->SetInput( reader->GetOutput() );
+
+        typedef itk::MRFImageFilter< ArrayImageType, OutputImageType > MRFFilterType;
+
+        MRFFilterType::Pointer mrfFilter = MRFFilterType::New();
+
+        mrfFilter->SetInput( scalarToArrayFilter->GetOutput() );
+        mrfFilter->SetNumberOfClasses( numClass );
+        mrfFilter->SetMaximumNumberOfIterations( 30 );
+        mrfFilter->SetErrorTolerance( 1e-7 );
+
+        mrfFilter->SetSmoothingFactor( 1 );
+
+        typedef itk::ImageClassifierBase< ArrayImageType, OutputImageType >   SupervisedClassifierType;
+        SupervisedClassifierType::Pointer classifier = SupervisedClassifierType::New();
+
+        typedef itk::Statistics::MinimumDecisionRule DecisionRuleType;
+        DecisionRuleType::Pointer  classifierDecisionRule = DecisionRuleType::New();
+        classifier->SetDecisionRule( classifierDecisionRule.GetPointer() );
+
+        typedef itk::Statistics::DistanceToCentroidMembershipFunction< ArrayPixelType >  MembershipFunctionType;
+        typedef MembershipFunctionType::Pointer MembershipFunctionPointer;
+
+        double meanDistance = 0;
+        MembershipFunctionType::CentroidType centroid(1);
+        for( unsigned int i=0; i < static_cast<unsigned int>(numClass); i++ )
+        {
+            MembershipFunctionPointer membershipFunction = MembershipFunctionType::New();
+            centroid[0] = meanGuess[i];
+
+            membershipFunction->SetCentroid( centroid );
+
+            classifier->AddMembershipFunction( membershipFunction );
+            meanDistance += static_cast< double > (centroid[0]);
+        }
+
+        meanDistance /= numClass;
+
+        mrfFilter->SetSmoothingFactor( 1 );
+        mrfFilter->SetNeighborhoodRadius( 1 );
+
+        //TODO Review how is the matrix neighborhood is build!
+        std::vector< double > weights;
+        weights.push_back(1.5);
+        weights.push_back(2.0);
+        weights.push_back(1.5);
+        weights.push_back(2.0);
+        weights.push_back(0.0); // This is the central pixel
+        weights.push_back(2.0);
+        weights.push_back(1.5);
+        weights.push_back(2.0);
+        weights.push_back(1.5);
+
+        weights.push_back(1.5);
+        weights.push_back(2.0);
+        weights.push_back(1.5);
+        weights.push_back(2.0);
+        weights.push_back(0.0); // This is the central pixel
+        weights.push_back(2.0);
+        weights.push_back(1.5);
+        weights.push_back(2.0);
+        weights.push_back(1.5);
+
+        weights.push_back(1.5);
+        weights.push_back(2.0);
+        weights.push_back(1.5);
+        weights.push_back(2.0);
+        weights.push_back(0.0); // This is the central pixel
+        weights.push_back(2.0);
+        weights.push_back(1.5);
+        weights.push_back(2.0);
+        weights.push_back(1.5);
+
+        double totalWeight = 0;
+        for(std::vector< double >::const_iterator wcIt = weights.begin();
+            wcIt != weights.end(); ++wcIt )
+        {
+            totalWeight += *wcIt;
+        }
+        for(std::vector< double >::iterator wIt = weights.begin();
+            wIt != weights.end(); ++wIt )
+        {
+            *wIt = static_cast< double > ( (*wIt) * meanDistance / (2 * totalWeight));
+        }
+
+        mrfFilter->SetMRFNeighborhoodWeight( weights );
+        mrfFilter->SetClassifier( classifier );
+
+        typedef MRFFilterType::OutputImageType  OutputImageType;
+
+        if (oneTissue) {
+            typedef itk::ThresholdImageFilter<OutputImageType> ThresoldType;
+            typename ThresoldType::Pointer thresolder = ThresoldType::New();
+            thresolder->SetInput(mrfFilter->GetOutput());
+
+            MRFFilterType::OutputImagePixelType tissueValue;
+            if (typeTissue == "White Matter") {
+                tissueValue = 3;
+            }else if (typeTissue == "Gray Matter") {
+                tissueValue = 2;
+            }else if (typeTissue == "CSF") {
+                tissueValue = 1;
+            }
+            thresolder->ThresholdOutside(tissueValue, tissueValue);
+            thresolder->SetOutsideValue(0);
+
+            typedef itk::ImageFileWriter< OutputImageType > WriterType;
+            WriterType::Pointer writer = WriterType::New();
+            writer->SetInput( thresolder->GetOutput() );
+            writer->SetFileName( outputLabel.c_str() );
+            writer->Update();
+
+            //General Information after segmentation
+            std::cout << "Number of Iterations : ";
+            std::cout << mrfFilter->GetNumberOfIterations() << std::endl;
+            std::cout << "Stop condition: " << std::endl;
+            std::cout << "  (1) Maximum number of iterations " << std::endl;
+            std::cout << "  (2) Error tolerance:  "  << std::endl;
+            std::cout << mrfFilter->GetStopCondition() << std::endl;
+
+            return EXIT_SUCCESS;
+        }else{
+            typedef itk::ImageFileWriter< OutputImageType > WriterType;
+            WriterType::Pointer writer = WriterType::New();
+            writer->SetInput( mrfFilter->GetOutput() );
+            writer->SetFileName( outputLabel.c_str() );
+            writer->Update();
+
+            // General Information after segmentation
+            std::cout << "Number of Iterations : ";
+            std::cout << mrfFilter->GetNumberOfIterations() << std::endl;
+            std::cout << "Stop condition: " << std::endl;
+            std::cout << "  (1) Maximum number of iterations " << std::endl;
+            std::cout << "  (2) Error tolerance:  "  << std::endl;
+            std::cout << mrfFilter->GetStopCondition() << std::endl;
+
+            return EXIT_SUCCESS;
+        }
+    }
+    return EXIT_SUCCESS;
 }
 
 } // end of anonymous namespace

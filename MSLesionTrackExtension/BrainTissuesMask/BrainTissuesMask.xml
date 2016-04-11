@@ -73,9 +73,9 @@
 	   </constraints>
 	</integer> 
 	<boolean>
-	      <name>useGMM</name>
-	      <longflag>--useGMM</longflag>
-	      <description><![CDATA[Use Gaussian Mixture Model to set the initial mean values guess for each tissue. If this option is selected, the Tissues mean value guess is not used.]]></description>
+	      <name>guessMeans</name>
+	      <longflag>--guessMeans</longflag>
+	      <description><![CDATA[Use K-Means algorithm to set a first initial mean values guess. If this option is selected, the Tissues mean value guess parameter is not used.]]></description>
 	      <label>Use Gaussian Mixture Model initial guess</label>
 	      <default>false</default>
 	</boolean>
@@ -84,7 +84,7 @@
  	      <longflag>--means</longflag>
  	      <description><![CDATA[A first approximation for the mean value of each tissue class.]]></description>
  	      <label>Tissues mean value guess</label>
- 	      <default>0, 80, 170, 200</default>
+ 	      <default>0,80,170,200</default>
  	    </double-vector>
   </parameters>
 </executable>
