@@ -19,19 +19,19 @@ int DoIt( int argc, char * argv[], T )
 {
     PARSE_ARGS;
 
-//          typedef    T                  InputPixelType;
-////          typedef    T                  OutputPixelType;
-//          typedef itk::Image<InputPixelType,  3> InputImageType;
-//    //      typedef itk::Image<OutputPixelType, 3> OutputImageType;
+          typedef    T                  InputPixelType;
+          typedef    T                  OutputPixelType;
+          typedef itk::Image<InputPixelType,  3> InputImageType;
+          typedef itk::Image<OutputPixelType, 3> OutputImageType;
 
-//          typedef itk::ImageFileReader<InputImageType>  ReaderType;
+          typedef itk::ImageFileReader<InputImageType>  ReaderType;
 //      typedef itk::ImageFileWriter<InputImageType> WriterType;
 
-////    Reading input files
-//    typename ReaderType::Pointer readerT1 = ReaderType::New();
-//    typename ReaderType::Pointer readerFA = ReaderType::New();
-//    readerT1->SetFileName( T1InputVolume.c_str() );
-//    readerFA->SetFileName(FAInputVolume.c_str());
+//    Reading input files
+    typename ReaderType::Pointer readerT1 = ReaderType::New();
+    typename ReaderType::Pointer readerFA = ReaderType::New();
+    readerT1->SetFileName( T1WMMask.c_str() );
+    readerFA->SetFileName(FAInputVolume.c_str());
 
 ////    Inserting input files in output folder
 //    typename WriterType::Pointer writer = WriterType::New();
@@ -70,15 +70,15 @@ int DoIt( int argc, char * argv[], T )
     //    }
 
 
-        DTIMapSegmentation segmentation(FAInputVolume.c_str(),outputLabels.c_str());
-        segmentation.setNumClasses(numClasses);
-        if (segFAMethod == "Bayesian") {
-            segmentation.runSegmentation(DTIMapSegmentation::BAYES);
-        }else if (segFAMethod == "MRF") {
-            segmentation.runSegmentation(DTIMapSegmentation::MRF);
-        }else if (segFAMethod == "KMeans") {
-            segmentation.runSegmentation(DTIMapSegmentation::KMEANS);
-        }
+//        DTIMapSegmentation segmentation(FAInputVolume.c_str(),outputLabels.c_str());
+//        segmentation.setNumClasses(numClasses);
+//        if (segFAMethod == "Bayesian") {
+//            segmentation.runSegmentation(DTIMapSegmentation::BAYES);
+//        }else if (segFAMethod == "MRF") {
+//            segmentation.runSegmentation(DTIMapSegmentation::MRF);
+//        }else if (segFAMethod == "KMeans") {
+//            segmentation.runSegmentation(DTIMapSegmentation::KMEANS);
+//        }
 
 
 

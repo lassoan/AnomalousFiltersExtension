@@ -16,7 +16,7 @@
       <label>Input Volume</label>
       <channel>input</channel>
       <index>0</index>
-      <description><![CDATA[Input volume. The algorithm works better with high resolution T1 MRI images.]]></description>
+      <description><![CDATA[Input volume. The algorithm works better with high resolution T1 MRI images alread brain extract and inhomogeneity corrected.]]></description>
     </image>
     <image type="label">
       <name>outputLabel</name>
@@ -77,7 +77,7 @@
 	      <longflag>--guessMeans</longflag>
 	      <description><![CDATA[Use K-Means algorithm to set a first initial mean values guess. If this option is selected, the Tissues mean value guess parameter is not used.]]></description>
 	      <label>Use Gaussian Mixture Model initial guess</label>
-	      <default>false</default>
+	      <default>true</default>
 	</boolean>
 	<double-vector>
  	      <name>meanGuess</name>
