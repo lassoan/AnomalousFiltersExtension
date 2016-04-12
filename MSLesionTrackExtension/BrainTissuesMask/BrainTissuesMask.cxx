@@ -51,30 +51,35 @@ int DoIt( int argc, char * argv[], T )
     reader->SetFileName( inputVolume.c_str() );
     reader->Update();
 
-//TODO Finish the automatic mean value guess part
-//    double meanValues[numClass] = meanGuess;
-//    if (guessMeans) {
-//        // Estimating the initial mean values
-//        typedef itk::ScalarImageKmeansImageFilter< InputImageType > KMeansFilterType;
-//        KMeansFilterType::Pointer kmeansFilter = KMeansFilterType::New();
-//        kmeansFilter->SetInput( reader->GetOutput() );
-//        const unsigned int numberOfInitialClasses = numClass;
+//TODO Study the use of Gaussian Mxiture Model to estimate the mean values in the image
+    double meanValues[numClass];
+//    = meanGuess;
+    if (guessMeans) {
+        // Estimating the initial mean values
+        typedef itk::ScalarImageKmeansImageFilter< InputImageType > KMeansFilterType;
+        KMeansFilterType::Pointer kmeansFilter = KMeansFilterType::New();
+        kmeansFilter->SetInput( reader->GetOutput() );
+        const unsigned int numberOfInitialClasses = numClass;
 
-//        for( unsigned k=0; k < numberOfInitialClasses; k++ )
-//        {
-//            kmeansFilter->AddClassWithInitialMean(meanGuess[k]);
-//        }
+        for( unsigned k=0; k < numberOfInitialClasses; k++ )
+        {
+            kmeansFilter->AddClassWithInitialMean(meanGuess[k]);
+        }
 
-//        kmeansFilter->Update();
+        kmeansFilter->Update();
 
-//        KMeansFilterType::ParametersType estimatedMeans = kmeansFilter->GetFinalMeans();
-//        const unsigned int numberOfClasses = estimatedMeans.Size();
-//        for ( unsigned int i = 0; i < numberOfClasses; ++i )
-//        {
-//            meanValues[i] = estimatedMeans[i];
-//        }
-//    }
-
+        KMeansFilterType::ParametersType estimatedMeans = kmeansFilter->GetFinalMeans();
+        const unsigned int numberOfClasses = estimatedMeans.Size();
+        for ( unsigned int i = 0; i < numberOfClasses; ++i )
+        {
+            meanValues[i] = estimatedMeans[i];
+            std::cout<<"Estimated mean["<<i<<"] = "<<meanValues[i]<<std::endl;
+        }
+    }else{
+        for (int n = 0; n < numClass; ++n) {
+            meanValues[n]=meanGuess[n];
+        }
+    }
 
     //            Apply segmentation procedure
     if (segMethod == "KMeans") {
@@ -86,7 +91,7 @@ int DoIt( int argc, char * argv[], T )
 
         for( unsigned k=0; k < numberOfInitialClasses; k++ )
         {
-            kmeansFilter->AddClassWithInitialMean(meanGuess[k]);
+            kmeansFilter->AddClassWithInitialMean(meanValues[k]);
         }
 
         kmeansFilter->Update();
@@ -231,7 +236,7 @@ int DoIt( int argc, char * argv[], T )
         for( unsigned int i=0; i < static_cast<unsigned int>(numClass); i++ )
         {
             MembershipFunctionPointer membershipFunction = MembershipFunctionType::New();
-            centroid[0] = meanGuess[i];
+            centroid[0] = meanValues[i];
 
             membershipFunction->SetCentroid( centroid );
 
@@ -246,15 +251,15 @@ int DoIt( int argc, char * argv[], T )
 
         //TODO Review how is the matrix neighborhood is build!
         std::vector< double > weights;
+        weights.push_back(1.0);
         weights.push_back(1.5);
-        weights.push_back(2.0);
+        weights.push_back(1.0);
         weights.push_back(1.5);
-        weights.push_back(2.0);
-        weights.push_back(0.0); // This is the central pixel
-        weights.push_back(2.0);
+        weights.push_back(1.0); // This is the central pixel
         weights.push_back(1.5);
-        weights.push_back(2.0);
+        weights.push_back(1.0);
         weights.push_back(1.5);
+        weights.push_back(1.0);
 
         weights.push_back(1.5);
         weights.push_back(2.0);
@@ -266,15 +271,15 @@ int DoIt( int argc, char * argv[], T )
         weights.push_back(2.0);
         weights.push_back(1.5);
 
+        weights.push_back(1.0);
         weights.push_back(1.5);
-        weights.push_back(2.0);
+        weights.push_back(1.0);
         weights.push_back(1.5);
-        weights.push_back(2.0);
-        weights.push_back(0.0); // This is the central pixel
-        weights.push_back(2.0);
+        weights.push_back(1.0); // This is the central pixel
         weights.push_back(1.5);
-        weights.push_back(2.0);
+        weights.push_back(1.0);
         weights.push_back(1.5);
+        weights.push_back(1.0);
 
         double totalWeight = 0;
         for(std::vector< double >::const_iterator wcIt = weights.begin();
