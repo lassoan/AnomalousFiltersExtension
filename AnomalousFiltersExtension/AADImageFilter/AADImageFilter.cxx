@@ -1,6 +1,8 @@
 #include "itkImageFileWriter.h"
 
 #include "AnisotropicAnomalousDiffusionImageFilter.h"
+#include "itkRescaleIntensityImageFilter.h"
+#include "itkMinimumMaximumImageCalculator.h"
 #include "itkCastImageFilter.h"
 
 #include "itkPluginUtilities.h"
@@ -26,9 +28,11 @@ int DoIt( int argc, char * argv[], T )
     typedef itk::Image<InputPixelType,  3> InputImageType;
     typedef itk::Image<OutputPixelType, 3> OutputImageType;
 
-    typedef itk::ImageFileReader<InputImageType>  ReaderType;
-    typedef itk::ImageFileWriter<OutputImageType> WriterType;
-    typedef itk::CastImageFilter<InputImageType, OutputImageType> CastType;
+    typedef itk::ImageFileReader<InputImageType>                        ReaderType;
+    typedef itk::ImageFileWriter<OutputImageType>                       WriterType;
+    typedef itk::CastImageFilter<InputImageType, OutputImageType>       CastInput2OutputType;
+    typedef itk::RescaleIntensityImageFilter<InputImageType>            RescalerInputFilterType;
+    typedef itk::RescaleIntensityImageFilter<OutputImageType>           RescalerOutputFilterType;
 
     typedef itk::AnisotropicAnomalousDiffusionImageFilter<InputImageType, InputImageType> FilterType;
 
@@ -36,24 +40,39 @@ int DoIt( int argc, char * argv[], T )
     itk::PluginFilterWatcher watchReader(reader, "Read Volume",CLPProcessInformation);
 
     reader->SetFileName( inputVolume.c_str() );
+    typename RescalerInputFilterType::Pointer input_rescaler = RescalerInputFilterType::New();
+    input_rescaler->SetInput(reader->GetOutput());
+    input_rescaler->SetOutputMaximum(255);
+    input_rescaler->SetOutputMinimum(0);
 
     typename FilterType::Pointer filter = FilterType::New();
     itk::PluginFilterWatcher watchFilter(filter, "Anisotropic Anomalous Diffusion",CLPProcessInformation);
 
-    filter->SetInput( reader->GetOutput() );
+    filter->SetInput( input_rescaler->GetOutput() );
     filter->SetIterations(iterations);
     filter->SetCondutance(condutance);
     filter->SetTimeStep(timeStep);
     filter->SetQ(q);
+    filter->Update();
 
-    typename CastType::Pointer cast = CastType::New();
+    typename CastInput2OutputType::Pointer cast = CastInput2OutputType::New();
     cast->SetInput( filter->GetOutput() );
 
+    typedef itk::MinimumMaximumImageCalculator<InputImageType> MinMaxCalcType;
+    typename MinMaxCalcType::Pointer imgValues = MinMaxCalcType::New();
+    imgValues->SetImage(reader->GetOutput());
+    imgValues->Compute();
+
+    typename RescalerOutputFilterType::Pointer output_rescaler = RescalerOutputFilterType::New();
+    output_rescaler->SetInput(cast->GetOutput());
+    output_rescaler->SetOutputMinimum(imgValues->GetMinimum());
+    output_rescaler->SetOutputMaximum(imgValues->GetMaximum());
+    std::cout<<"min: "<<imgValues->GetMinimum()<<" max: "<<imgValues->GetMaximum()<<std::endl;
     typename WriterType::Pointer writer = WriterType::New();
     itk::PluginFilterWatcher watchWriter(writer, "Write Volume",CLPProcessInformation);
 
     writer->SetFileName( outputVolume.c_str() );
-    writer->SetInput( cast->GetOutput() );
+    writer->SetInput( output_rescaler->GetOutput() );
     writer->SetUseCompression(1);
     writer->Update();
 

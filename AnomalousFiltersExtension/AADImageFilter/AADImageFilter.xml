@@ -38,8 +38,8 @@
       <default>5</default>
       <constraints>
         <minimum>0</minimum>
-        <maximum>10</maximum>
-        <step>0.01</step>
+        <maximum>100</maximum>
+        <step>1</step>
       </constraints>
     </double>
     <integer>
