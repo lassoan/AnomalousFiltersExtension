@@ -12,13 +12,15 @@
 #include "itkComposeImageFilter.h"
 #endif
 
-
+#include <itkMinimumMaximumImageCalculator.h>
+#include <itkRescaleIntensityImageFilter.h>
 #include <itkDiffusionTensor3DReconstructionImageFilter.h>
 #include <itkTensorFractionalAnisotropyImageFilter.h>
 #include <itkTensorRelativeAnisotropyImageFilter.h>
 
 #include "AADDiffusionWeightedDataCLP.h"
 
+#define DIMENSION 3
 
 // Use an anonymous namespace to keep class types and function names
 // from colliding when module is used as shared object module.  Every
@@ -39,9 +41,10 @@ int DoIt( int argc, char * argv[], T )
     unsigned int numberOfGradientImages = 0;
     bool readb0 = false;
     double b0 = 0;
-    typedef short                                           PixelType;
+    typedef float                                           PixelType;
     typedef itk::VectorImage<PixelType, Dimension>          VectorImageType;
     typedef itk::Image< PixelType, Dimension >              ScalarImageType;
+    typedef itk::RescaleIntensityImageFilter<ScalarImageType>            RescalerInputFilterType;
     itk::ImageFileReader<VectorImageType>::Pointer reader = itk::ImageFileReader<VectorImageType>::New();
     VectorImageType::Pointer img;
     typedef itk::AnisotropicAnomalousDiffusionImageFilter<ScalarImageType, ScalarImageType> AADFilterType;
@@ -162,27 +165,40 @@ int DoIt( int argc, char * argv[], T )
             ++dwiit;
         }
         imageContainer.push_back( image );
-
     }
 
-    for(unsigned int countImage=0; countImage<numberOfImages; countImage++){
-        typename AADFilterType::Pointer filter = AADFilterType::New();
-        filter->SetInput( imageContainer[countImage] );
-        filter->SetIterations(iterations);
-        filter->SetCondutance(condutance);
-        filter->SetTimeStep(timeStep);
-        filter->SetQ(q);
-        filter->Update();
 
-        scalarToVectorImageFilter->SetInput(countImage, filter->GetOutput());
+    for(unsigned int countImage=0; countImage<numberOfImages; countImage++){
+//        typename RescalerInputFilterType::Pointer input_rescaler = RescalerInputFilterType::New();
+//        input_rescaler->SetInput( imageContainer[countImage] );
+//        input_rescaler->SetOutputMaximum(255);
+//        input_rescaler->SetOutputMinimum(0);
+//        typename AADFilterType::Pointer filter = AADFilterType::New();
+//        filter->SetInput( input_rescaler->GetOutput() );
+//        filter->SetIterations(iterations);
+//        filter->SetCondutance(condutance);
+//        filter->SetTimeStep(timeStep);
+//        filter->SetQ(q);
+//        filter->Update();
+
+//        typedef itk::MinimumMaximumImageCalculator<ScalarImageType> MinMaxCalcType;
+//        typename MinMaxCalcType::Pointer imgValues = MinMaxCalcType::New();
+//        imgValues->SetImage(imageContainer[countImage] );
+//        imgValues->Compute();
+
+//        typename RescalerInputFilterType::Pointer output_rescaler = RescalerInputFilterType::New();
+//        output_rescaler->SetInput(filter->GetOutput());
+//        output_rescaler->SetOutputMinimum(imgValues->GetMinimum());
+//        output_rescaler->SetOutputMaximum(imgValues->GetMaximum());
+        scalarToVectorImageFilter->SetInput(countImage, imageContainer[countImage]);
     }
 
     scalarToVectorImageFilter->Update();
     VectorImageType::Pointer diffusionImage = scalarToVectorImageFilter->GetOutput();
 
     // let's write it out
-
-    typename itk::NrrdImageIO::Pointer io = itk::NrrdImageIO::New();
+    typedef itk::NrrdImageIO NrrdImageType;
+    typename NrrdImageType::Pointer io = NrrdImageType::New();
 
     itk::MetaDataDictionary metaDataDictionary;
     metaDataDictionary = reader->GetMetaDataDictionary();
@@ -209,6 +225,8 @@ int DoIt( int argc, char * argv[], T )
     }
 
     return EXIT_SUCCESS;
+
+
 
 }
 

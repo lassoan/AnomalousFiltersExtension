@@ -67,7 +67,6 @@ int DoIt( int argc, char * argv[], T )
     output_rescaler->SetInput(cast->GetOutput());
     output_rescaler->SetOutputMinimum(imgValues->GetMinimum());
     output_rescaler->SetOutputMaximum(imgValues->GetMaximum());
-    std::cout<<"min: "<<imgValues->GetMinimum()<<" max: "<<imgValues->GetMaximum()<<std::endl;
     typename WriterType::Pointer writer = WriterType::New();
     itk::PluginFilterWatcher watchWriter(writer, "Write Volume",CLPProcessInformation);
 
