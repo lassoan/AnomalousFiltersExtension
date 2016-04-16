@@ -20,6 +20,7 @@ include(${Slicer_USE_FILE})
 # Extension modules
 add_subdirectory(DTILesionTrack)
 add_subdirectory(BrainTissuesMask)
+add_subdirectory(BrainExtractionTool)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------
