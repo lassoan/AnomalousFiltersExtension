@@ -18,6 +18,8 @@
 #include <itkTensorFractionalAnisotropyImageFilter.h>
 #include <itkTensorRelativeAnisotropyImageFilter.h>
 
+#include "itkVectorIndexSelectionCastImageFilter.h"
+
 #include "AADDiffusionWeightedDataCLP.h"
 
 #define DIMENSION 3
@@ -35,6 +37,7 @@ template <class T>
 int DoIt( int argc, char * argv[], T )
 {
     PARSE_ARGS;
+
 
     const unsigned int Dimension = 3;
     unsigned int numberOfImages = 0;
@@ -148,23 +151,28 @@ int DoIt( int argc, char * argv[], T )
             VectorImageType> ScalarToVectorFilterType;
 #endif
     typename ScalarToVectorFilterType::Pointer scalarToVectorImageFilter = ScalarToVectorFilterType::New();
+    typedef itk::VectorIndexSelectionCastImageFilter<VectorImageType, ScalarImageType> VectorToScalarType;
+    typename VectorToScalarType::Pointer vector2scalar = VectorToScalarType::New();
+    vector2scalar->SetInput(img);
     for( unsigned int i = 0; i<numberOfImages; i++ )
     {
-        ScalarImageType::Pointer image = ScalarImageType::New();
-        image->CopyInformation( img );
-        image->SetBufferedRegion( img->GetBufferedRegion() );
-        image->SetRequestedRegion( img->GetRequestedRegion() );
-        image->Allocate();
-        IteratorType it( image, image->GetBufferedRegion() );
-        dwiit.GoToBegin();
-        it.GoToBegin();
-        while (!it.IsAtEnd())
-        {
-            it.Set(dwiit.Get()[i]);
-            ++it;
-            ++dwiit;
-        }
-        imageContainer.push_back( image );
+//        ScalarImageType::Pointer image = ScalarImageType::New();
+//        image->CopyInformation( img );
+//        image->SetBufferedRegion( img->GetBufferedRegion() );
+//        image->SetRequestedRegion( img->GetRequestedRegion() );
+//        image->Allocate();
+//        IteratorType it( image, image->GetBufferedRegion() );
+//        dwiit.GoToBegin();
+//        it.GoToBegin();
+//        while (!it.IsAtEnd())
+//        {
+//            it.Set(dwiit.Get()[i]);
+//            ++it;
+//            ++dwiit;
+//        }
+//        imageContainer.push_back( image );
+        vector2scalar->SetIndex(i);
+        scalarToVectorImageFilter->SetInput(i, vector2scalar->GetOutput());
     }
 
 
@@ -190,7 +198,7 @@ int DoIt( int argc, char * argv[], T )
 //        output_rescaler->SetInput(filter->GetOutput());
 //        output_rescaler->SetOutputMinimum(imgValues->GetMinimum());
 //        output_rescaler->SetOutputMaximum(imgValues->GetMaximum());
-        scalarToVectorImageFilter->SetInput(countImage, imageContainer[countImage]);
+//        scalarToVectorImageFilter->SetInput(countImage, imageContainer[countImage]);
     }
 
     scalarToVectorImageFilter->Update();
