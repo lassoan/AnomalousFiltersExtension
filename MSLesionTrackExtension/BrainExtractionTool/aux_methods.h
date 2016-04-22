@@ -1,5 +1,13 @@
 #include <vnl/vnl_matrix.h>
 #include <vnl/vnl_vector.h>
+#include <cstdlib>
+//#ifdef _WIN32
+//#define DAT_DIR "\\dat\\"
+//char* HOME_DIR=getenv("HOMEPATH");
+//#else
+//#define DAT_DIR "/dat/"
+//char* HOME_DIR=getenv("HOME");
+//#endif
 
 char * generateBogusFilename();
 

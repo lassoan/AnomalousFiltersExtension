@@ -1,4 +1,12 @@
 #define MAX_R 30000
+//#ifdef _WIN32
+//#define DAT_DIR "\\dat\\"
+//char* HOME_DIR=getenv("HOMEPATH");
+//#else
+//#define DAT_DIR "/dat/"
+//char* HOME_DIR=getenv("HOME");
+//#endif
+
 int load_nrnodes();
 int load_ntree();
 double * load_xbestsplit();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
   <category>Segmentation.MS Lesion Track</category>
-  <title>BrainTissuesMask</title>
+  <title>Brain Tissues Mask</title>
   <description><![CDATA[This CLI module aims to extract brain tissues mask. This tool was intensively tested with T1 MRI images, but the pipeline could be applied to any other structural MRI image. The goal here is to provide a brain tissue segmentation tool in order to provide a brain mask for other segmentation procedures. The MS Lesion Track segmentation modules apply a T1 white matter masks directly as input parameter, and this module could help you to create the requested white matter mask.]]></description>
   <version>0.0.1</version>
   <documentation-url>https://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/BrainTissuesMask</documentation-url>
