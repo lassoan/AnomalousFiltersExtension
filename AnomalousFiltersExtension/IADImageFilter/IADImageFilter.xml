@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
   <category>Filtering.Anomalous Filters</category>
-  <title>IADImageFilter</title>
+  <title>IAD Image Filter</title>
   <description><![CDATA[This is a CLI module that can be bundled in an extension]]></description>
   <version>1.0.0</version>
   <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/AnomalousFilters</documentation-url>

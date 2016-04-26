@@ -37,7 +37,7 @@ int DoIt( int argc, char * argv[], T )
     typedef itk::AnisotropicAnomalousDiffusionImageFilter<InputImageType, InputImageType> FilterType;
 
     typename ReaderType::Pointer reader = ReaderType::New();
-    itk::PluginFilterWatcher watchReader(reader, "Read Volume",CLPProcessInformation);
+        itk::PluginFilterWatcher watchReader(reader, "Read Volume",CLPProcessInformation);
 
     reader->SetFileName( inputVolume.c_str() );
     typename RescalerInputFilterType::Pointer input_rescaler = RescalerInputFilterType::New();
@@ -46,14 +46,7 @@ int DoIt( int argc, char * argv[], T )
     input_rescaler->SetOutputMinimum(0);
 
     typename FilterType::Pointer filter = FilterType::New();
-    itk::PluginFilterWatcher watchFilter(filter, "Anisotropic Anomalous Diffusion",CLPProcessInformation);
-
-    filter->SetInput( input_rescaler->GetOutput() );
-    filter->SetIterations(iterations);
-    filter->SetCondutance(condutance);
-    filter->SetTimeStep(timeStep);
-    filter->SetQ(q);
-    filter->Update();
+        itk::PluginFilterWatcher watchFilter(filter, "Anisotropic Anomalous Diffusion",CLPProcessInformation);
 
     typename CastInput2OutputType::Pointer cast = CastInput2OutputType::New();
     cast->SetInput( filter->GetOutput() );
@@ -68,7 +61,7 @@ int DoIt( int argc, char * argv[], T )
     output_rescaler->SetOutputMinimum(imgValues->GetMinimum());
     output_rescaler->SetOutputMaximum(imgValues->GetMaximum());
     typename WriterType::Pointer writer = WriterType::New();
-    itk::PluginFilterWatcher watchWriter(writer, "Write Volume",CLPProcessInformation);
+        itk::PluginFilterWatcher watchWriter(writer, "Write Volume",CLPProcessInformation);
 
     writer->SetFileName( outputVolume.c_str() );
     writer->SetInput( output_rescaler->GetOutput() );
