@@ -3,26 +3,27 @@
 #include "itkPluginUtilities.h"
 
 #include <itkMetaDataObject.h>
-#include <itkImageFileWriter.h>
-#include <itkNrrdImageIO.h>
-#include <itkCastImageFilter.h>
-#if ITK_VERSION_MAJOR < 4
-#include "itkCompose3DCovariantVectorImageFilter.h"
-#else
 #include "itkComposeImageFilter.h"
-#endif
-
 #include <itkMinimumMaximumImageCalculator.h>
 #include <itkRescaleIntensityImageFilter.h>
-#include <itkDiffusionTensor3DReconstructionImageFilter.h>
-#include <itkTensorFractionalAnisotropyImageFilter.h>
-#include <itkTensorRelativeAnisotropyImageFilter.h>
-
 #include "itkVectorIndexSelectionCastImageFilter.h"
 
 #include "AADDiffusionWeightedDataCLP.h"
 
-#define DIMENSION 3
+// CLI includes
+#include "itkPluginUtilities.h"
+
+// ITK includes
+#include <itkCastImageFilter.h>
+
+#include <iostream>
+
+#include "itkDiffusionTensor3DReconstructionImageFilter.h"
+#include "itkNrrdImageIO.h"
+#include "itkImageSeriesReader.h"
+#include "itkImageFileWriter.h"
+#include "itkImageRegionIterator.h"
+#include <iostream>
 
 // Use an anonymous namespace to keep class types and function names
 // from colliding when module is used as shared object module.  Every
@@ -38,23 +39,18 @@ int DoIt( int argc, char * argv[], T )
 {
     PARSE_ARGS;
 
-
     const unsigned int Dimension = 3;
     unsigned int numberOfImages = 0;
     unsigned int numberOfGradientImages = 0;
     bool readb0 = false;
     double b0 = 0;
-    typedef float                                           PixelType;
-    typedef itk::VectorImage<PixelType, Dimension>          VectorImageType;
-    typedef itk::Image< PixelType, Dimension >              ScalarImageType;
-    typedef itk::RescaleIntensityImageFilter<ScalarImageType>            RescalerInputFilterType;
-    itk::ImageFileReader<VectorImageType>::Pointer reader = itk::ImageFileReader<VectorImageType>::New();
-    VectorImageType::Pointer img;
-    typedef itk::AnisotropicAnomalousDiffusionImageFilter<ScalarImageType, ScalarImageType> AADFilterType;
-    // Set the properties for NrrdReader
-    reader->SetFileName( inputVolume.c_str());
-    // Read in the nrrd data. The file contains the reference image and the gradient
-    // images.
+    typedef unsigned short                      PixelType;
+    typedef itk::VectorImage<unsigned short, Dimension> ImageType;
+    itk::ImageFileReader<ImageType>::Pointer reader
+            = itk::ImageFileReader<ImageType>::New();
+    ImageType::Pointer img;
+
+    reader->SetFileName(inputVolume.c_str());
     try
     {
         reader->Update();
@@ -65,13 +61,7 @@ int DoIt( int argc, char * argv[], T )
         std::cout << ex << std::endl;
         return EXIT_FAILURE;
     }
-    // Here we instantiate the DiffusionTensor3DReconstructionImageFilter class.
-    // The class is templated over the pixel types of the reference, gradient
-    // and the to be created tensor pixel's precision. (We use double here). It
-    // takes as input the Reference (B0 image aquired in the absence of diffusion
-    // sensitizing gradients), 'n' Gradient images and their directions and produces
-    // as output an image of tensors with pixel-type DiffusionTensor3D.
-    //
+
     typedef itk::DiffusionTensor3DReconstructionImageFilter<
             PixelType, PixelType, double > TensorReconstructionImageFilterType;
     // -------------------------------------------------------------------------
@@ -135,106 +125,85 @@ int DoIt( int argc, char * argv[], T )
         return EXIT_FAILURE;
     }
 
-    std::vector< ScalarImageType::Pointer > imageContainer;
-    // iterator to iterate over the DWI Vector image just read in.
-    typedef itk::ImageRegionConstIterator< VectorImageType >         DWIIteratorType;
+    typedef itk::Image< PixelType, Dimension > ReferenceImageType;
+    typedef ReferenceImageType                 GradientImageType;
+
+    std::vector< GradientImageType::Pointer > imageContainer;
+
+    typedef itk::ImageRegionConstIterator< ImageType >         DWIIteratorType;
     DWIIteratorType dwiit( img, img->GetBufferedRegion() );
-    typedef itk::ImageRegionIterator< ScalarImageType > IteratorType;
+    typedef itk::ImageRegionIterator< GradientImageType > IteratorType;
 
-
-
-#if ITK_VERSION_MAJOR < 4
-    typedef itk::Compose3DCovariantVectorImageFilter<ScalarImageType,
-            VectorImageType> ScalarToVectorFilterType;
-#else
-    typedef itk::ComposeImageFilter<ScalarImageType,
-            VectorImageType> ScalarToVectorFilterType;
-#endif
-    typename ScalarToVectorFilterType::Pointer scalarToVectorImageFilter = ScalarToVectorFilterType::New();
-    typedef itk::VectorIndexSelectionCastImageFilter<VectorImageType, ScalarImageType> VectorToScalarType;
-    typename VectorToScalarType::Pointer vector2scalar = VectorToScalarType::New();
-    vector2scalar->SetInput(img);
     for( unsigned int i = 0; i<numberOfImages; i++ )
     {
-//        ScalarImageType::Pointer image = ScalarImageType::New();
-//        image->CopyInformation( img );
-//        image->SetBufferedRegion( img->GetBufferedRegion() );
-//        image->SetRequestedRegion( img->GetRequestedRegion() );
-//        image->Allocate();
-//        IteratorType it( image, image->GetBufferedRegion() );
-//        dwiit.GoToBegin();
-//        it.GoToBegin();
-//        while (!it.IsAtEnd())
-//        {
-//            it.Set(dwiit.Get()[i]);
-//            ++it;
-//            ++dwiit;
-//        }
-//        imageContainer.push_back( image );
-        vector2scalar->SetIndex(i);
-        scalarToVectorImageFilter->SetInput(i, vector2scalar->GetOutput());
+        GradientImageType::Pointer image = GradientImageType::New();
+        image->CopyInformation( img );
+        image->SetBufferedRegion( img->GetBufferedRegion() );
+        image->SetRequestedRegion( img->GetRequestedRegion() );
+        image->Allocate();
+        IteratorType it( image, image->GetBufferedRegion() );
+        dwiit.GoToBegin();
+        it.GoToBegin();
+        while (!it.IsAtEnd())
+        {
+            it.Set(dwiit.Get()[i]);
+            ++it;
+            ++dwiit;
+        }
+        imageContainer.push_back( image );
     }
 
+    typedef itk::ComposeImageFilter<GradientImageType,ImageType> ScalarToVectorFilterType;
+    typename ScalarToVectorFilterType::Pointer scalar2vector = ScalarToVectorFilterType::New();
 
-    for(unsigned int countImage=0; countImage<numberOfImages; countImage++){
-//        typename RescalerInputFilterType::Pointer input_rescaler = RescalerInputFilterType::New();
-//        input_rescaler->SetInput( imageContainer[countImage] );
-//        input_rescaler->SetOutputMaximum(255);
-//        input_rescaler->SetOutputMinimum(0);
-//        typename AADFilterType::Pointer filter = AADFilterType::New();
-//        filter->SetInput( input_rescaler->GetOutput() );
-//        filter->SetIterations(iterations);
-//        filter->SetCondutance(condutance);
-//        filter->SetTimeStep(timeStep);
-//        filter->SetQ(q);
-//        filter->Update();
+    typedef itk::AnisotropicAnomalousDiffusionImageFilter<GradientImageType,GradientImageType> FilterType;
 
-//        typedef itk::MinimumMaximumImageCalculator<ScalarImageType> MinMaxCalcType;
-//        typename MinMaxCalcType::Pointer imgValues = MinMaxCalcType::New();
-//        imgValues->SetImage(imageContainer[countImage] );
-//        imgValues->Compute();
+    typedef itk::RescaleIntensityImageFilter<GradientImageType> RescalerType;
+    typedef itk::MinimumMaximumImageCalculator<GradientImageType> MinMaxCalcType;
+    typename MinMaxCalcType::Pointer imgValues = MinMaxCalcType::New();
 
-//        typename RescalerInputFilterType::Pointer output_rescaler = RescalerInputFilterType::New();
-//        output_rescaler->SetInput(filter->GetOutput());
-//        output_rescaler->SetOutputMinimum(imgValues->GetMinimum());
-//        output_rescaler->SetOutputMaximum(imgValues->GetMaximum());
-//        scalarToVectorImageFilter->SetInput(countImage, imageContainer[countImage]);
+    for (int vol = 0; vol < numberOfImages; ++vol) {
+        typename RescalerType::Pointer rescaler = RescalerType::New();
+        typename FilterType::Pointer filter = FilterType::New();
+        imgValues->SetImage(imageContainer[vol]);
+        imgValues->Compute();
+        rescaler->SetInput(imageContainer[vol]);
+        rescaler->SetOutputMaximum(static_cast<GradientImageType::PixelType>(255));
+        rescaler->SetOutputMinimum(static_cast<GradientImageType::PixelType>(0));
+
+        filter->SetInput(rescaler->GetOutput());
+        filter->SetIterations(iterations);
+        filter->SetQ(q);
+        filter->SetCondutance(condutance);
+        filter->SetTimeStep(timeStep);
+        filter->Update();
+
+        rescaler->SetInput(filter->GetOutput());
+        rescaler->SetOutputMaximum(imgValues->GetMaximum());
+        rescaler->SetOutputMinimum(imgValues->GetMinimum());
+        scalar2vector->SetInput(vol, rescaler->GetOutput());
     }
 
-    scalarToVectorImageFilter->Update();
-    VectorImageType::Pointer diffusionImage = scalarToVectorImageFilter->GetOutput();
-
-    // let's write it out
-    typedef itk::NrrdImageIO NrrdImageType;
-    typename NrrdImageType::Pointer io = NrrdImageType::New();
+    scalar2vector->Update();
+    typename itk::NrrdImageIO::Pointer io = itk::NrrdImageIO::New();
 
     itk::MetaDataDictionary metaDataDictionary;
     metaDataDictionary = reader->GetMetaDataDictionary();
 
     io->SetFileTypeToBinary();
     io->SetMetaDataDictionary( metaDataDictionary );
-
-    typedef itk::ImageFileWriter<VectorImageType> WriterType;
+    typedef itk::ImageFileWriter<ImageType> WriterType;
     typename WriterType::Pointer nrrdWriter = WriterType::New();
     nrrdWriter->UseInputMetaDataDictionaryOff();
-    nrrdWriter->SetInput( diffusionImage );
     nrrdWriter->SetImageIO(io);
+    nrrdWriter->SetInput( scalar2vector->GetOutput() );
     nrrdWriter->SetFileName( outputVolume.c_str() );
-    nrrdWriter->UseCompressionOn();
-    try
-    {
-        nrrdWriter->Update();
-    }
-    catch( itk::ExceptionObject e )
-    {
-        std::cerr << argv[0] << ": exception caught !" << std::endl;
-        std::cerr << e << std::endl;
-        return EXIT_FAILURE;
-    }
+
+    nrrdWriter->Update();
+
+    std::cout << "success = " << EXIT_SUCCESS << std::endl;
 
     return EXIT_SUCCESS;
-
-
 
 }
 
