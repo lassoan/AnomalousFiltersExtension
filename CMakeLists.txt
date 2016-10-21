@@ -8,8 +8,8 @@ set(EXTENSION_HOMEPAGE "http://www.slicer.org/slicerWiki/index.php/Documentation
 set(EXTENSION_CATEGORY "Filtering.Anomalous Filters")
 set(EXTENSION_CONTRIBUTORS "Antonio Carlos Senra Filho (University of Sao Paulo), Luiz Otavio Murta Junior (University of Sao Paulo)")
 set(EXTENSION_DESCRIPTION "This extension aims to provide several approaches in order to apply the anomalous spatial filters on medical images.")
-set(EXTENSION_ICONURL "http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/AnomalousFiltersExtension.png")
-set(EXTENSION_SCREENSHOTURLS "http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/Screenshots/1.png")
+set(EXTENSION_ICONURL "https://www.slicer.org/slicerWiki/images/8/89/AnomalousDiffusionExtension-logo.png")
+set(EXTENSION_SCREENSHOTURLS "https://www.slicer.org/slicerWiki/images/6/64/MRI_raw.png https://www.slicer.org/slicerWiki/images/e/e8/MRI_AAD.png https://www.slicer.org/slicerWiki/images/0/0d/MRI_IAD.png https://www.slicer.org/slicerWiki/images/7/7b/Aad_scalar_gui.png https://www.slicer.org/slicerWiki/images/3/39/Iad_scalar_gui.png")
 
 #-----------------------------------------------------------------------------
 # Extension dependencies
