@@ -6,6 +6,12 @@
 #include <itkImageRegionConstIterator.h>
 #include <itkLaplacianOperator.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+using namespace std;
+
 namespace itk
 {
 template< typename TInputImage, typename TOutputImage >
@@ -16,7 +22,7 @@ AnisotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
     m_Condutance = 1;
     m_Iterations = 1;
     m_GeneralizedDiffusion=1.0;
-    m_TimeStep = (1.0 / std::pow(2.0,static_cast<double>(InputImageDimension) + 1));
+    m_TimeStep = (1.0 / pow(2.0,static_cast<double>(InputImageDimension) + 1));
 }
 
 template<typename TInputImage, typename TOutputImage>
@@ -112,19 +118,19 @@ template< typename TInputImage, typename TOutputImage>
 double AnisotropicAnomalousDiffusionImageFilter<TInputImage, TOutputImage >
 ::EdgeWeightedController(InputPixelType idxValue, InputPixelType centerValue)
 {
-    return  GeneralizedDiffCurve()*exp((-1.0)*pow(std::abs((idxValue - centerValue))/static_cast<InputPixelType>(m_Condutance),  2.0));
+    return  GeneralizedDiffCurve()*exp((-1.0)*pow(abs((idxValue - centerValue))/static_cast<InputPixelType>(m_Condutance),  2.0));
 }
 
 template< typename TInputImage, typename TOutputImage >
 void AnisotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
 ::TimeStepTestStability()
 {
-    if ( m_TimeStep >  ( 1.0 / std::pow(2.0, static_cast< double >( InputImageDimension ) +1) ))
+    if ( m_TimeStep >  ( 1.0 / pow(2.0, static_cast< double >( InputImageDimension ) +1) ))
     {
         itkWarningMacro( << "Anisotropic diffusion unstable time step: "
-                         << m_TimeStep << std::endl
+                         << m_TimeStep << endl
                          << "Stable time step for this image must be smaller than "
-                         << 1.0 / std::pow( 2.0, static_cast< double >( InputImageDimension ) +1) );
+                         << 1.0 / pow( 2.0, static_cast< double >( InputImageDimension ) +1) );
     }
 }
 
@@ -137,9 +143,9 @@ double AnisotropicAnomalousDiffusionImageFilter<TInputImage, TOutputImage >
     double alpha = (2.0 - m_Q)*(3.0 - m_Q);
     if (m_Q < 1.0) {
         //            d = 2*Math.pow(alpha, 2/(3-q))*Math.pow(Math.sqrt((1 - q) / Math.PI) * (gamma(1 + (1 / (1 - q))) / gamma(3 / 2 + (1 / (1 - q)))), ((2 - 2 * q) / (3 - q)));
-        d = m_GeneralizedDiffusion * std::exp((-1.0) * (std::pow(m_Q - 1.0, 2.0)) / 0.08);
+        d = m_GeneralizedDiffusion * exp((-1.0) * (pow(m_Q - 1.0, 2.0)) / 0.08);
     } else if (m_Q >= 1.0 && m_Q < 2.0) {
-        d = m_GeneralizedDiffusion * std::pow(alpha, 2.0 / (3.0 - m_Q)) * std::pow(sqrt((m_Q - 1.0) / M_PI) * (tgamma(1.0 / (m_Q - 1.0)) / tgamma((1.0 / (m_Q - 1.0)) - 1.0 / 2.0)), ((2.0 - 2.0 * m_Q) / (3.0 - m_Q)));
+        d = m_GeneralizedDiffusion * pow(alpha, 2.0 / (3.0 - m_Q)) * pow(sqrt((m_Q - 1.0) / M_PI) * (tgamma(1.0 / (m_Q - 1.0)) / tgamma((1.0 / (m_Q - 1.0)) - 1.0 / 2.0)), ((2.0 - 2.0 * m_Q) / (3.0 - m_Q)));
         //            d = percentD * Math.exp((-1) * (Math.pow(q - 1.0, 2.0)) / 0.4);
     } else if (m_Q == 1.0) {
         d = m_GeneralizedDiffusion;

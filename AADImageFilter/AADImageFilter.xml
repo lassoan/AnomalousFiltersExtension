@@ -2,12 +2,12 @@
 <executable>
   <category>Filtering.Anomalous Filters</category>
   <title>AAD Image Filter</title>
-  <description><![CDATA[This is a CLI module that can be bundled in the MS Lesion Track extension. The goal here is to provide a brain tissue segmentation tool in order to provide a brain mask for other segmentation procedures. The MS Lesion Track segmentation modules use T1 white matter masks directly as input parameter, and this module could help you to create the white matter mask needed.]]></description>
+  <description><![CDATA[This is a CLI module that is bundled in the Anomalous Diffusion Filters extension. Here, it is implemented the Anisotropic Anomalous Diffusion filter (AAD), representing the anomalous diffusion process by a multivariate q-Gaussian iterative solution of the anisotropic porous media equation.]]></description>
   <version>1.0.0</version>
   <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/AnomalousFilters</documentation-url>
   <license>Slicer</license>
   <contributor>Antonio Carlos Senra Filho (University of Sao Paulo), Luiz Otavio Murta Junior (University of Sao Paulo)</contributor>
-  <acknowledgements>This work was partially funded by CAPES, a Brazilian Finantial Agency</acknowledgements>
+  <acknowledgements>This work was partially funded by CAPES and CNPq</acknowledgements>
   <parameters>
     <label>IO</label>
     <description><![CDATA[Input/output parameters]]></description>    
