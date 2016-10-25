@@ -5,7 +5,7 @@ project(AnomalousFiltersExtension)
 #-----------------------------------------------------------------------------
 # Extension meta-information
 set(EXTENSION_HOMEPAGE "http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/AnomalousFilters")
-set(EXTENSION_CATEGORY "Filtering.Anomalous Filters")
+set(EXTENSION_CATEGORY "Filtering")
 set(EXTENSION_CONTRIBUTORS "Antonio Carlos Senra Filho (University of Sao Paulo), Luiz Otavio Murta Junior (University of Sao Paulo)")
 set(EXTENSION_DESCRIPTION "This extension aims to provide several approaches in order to apply the anomalous spatial filters on medical images. The methods provided here are numerical solution of the generalized anomalous diffusion proposed by Constantino Tsallis, which, in other words, provide a numerical solution to the porous media equation (Fokker-Planck anomalous heat equation). At the moment, the Modules available are suppose to be used on scalar volumes, mainly MRI strucutral images namely T1 and T2 weighted images. Future developments will add new functionalities in order to attenuate image noise in other imaging modalities, such as diffusion weighted images (DWI and DTI). More details could be found in the wiki page.")
 set(EXTENSION_ICONURL "https://www.slicer.org/slicerWiki/images/8/89/AnomalousDiffusionExtension-logo.png")

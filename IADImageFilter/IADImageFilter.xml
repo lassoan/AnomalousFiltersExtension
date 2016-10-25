@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
-  <category>Filtering.Anomalous Filters</category>
-  <title>IAD Image Filter</title>
+  <category>Filtering.Denoising</category>
+  <title>Isotropic Anomalous Diffusion</title>
   <description><![CDATA[This is a CLI module that is bundled in the Anomalous Diffusion Filters extension. Here, it is implemented the Isotropic Anomalous Diffusion filter (IAD), representing the anomalous diffusion process by a q-Gaussian iterative solution of the isotropic porous media equation.]]></description>
   <version>1.0.0</version>
   <documentation-url>https://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/IADImageFilter</documentation-url>

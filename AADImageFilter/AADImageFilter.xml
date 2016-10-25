@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
-  <category>Filtering.Anomalous Filters</category>
-  <title>AAD Image Filter</title>
+  <category>Filtering.Denoising</category>
+  <title>Anisotropic Anomalous Diffusion</title>
   <description><![CDATA[This is a CLI module that is bundled in the Anomalous Diffusion Filters extension. Here, it is implemented the Anisotropic Anomalous Diffusion filter (AAD), representing the anomalous diffusion process by a multivariate q-Gaussian iterative solution of the anisotropic porous media equation.]]></description>
   <version>1.0.0</version>
-  <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/AnomalousFilters</documentation-url>
+  <documentation-url>https://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/AADImageFilter</documentation-url>
   <license>Slicer</license>
   <contributor>Antonio Carlos Senra Filho (University of Sao Paulo), Luiz Otavio Murta Junior (University of Sao Paulo)</contributor>
   <acknowledgements>This work was partially funded by CAPES and CNPq</acknowledgements>
