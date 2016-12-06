@@ -1,6 +1,6 @@
 #ifndef __itkAnisotropicAnomalousDiffusionImageFilter_hxx
 #define __itkAnisotropicAnomalousDiffusionImageFilter_hxx
-#include "AnisotropicAnomalousDiffusionImageFilter.h"
+#include "itkAnisotropicAnomalousDiffusionImageFilter.h"
 
 #include <itkImageRegionIterator.h>
 #include <itkImageRegionConstIterator.h>
@@ -74,6 +74,8 @@ AnisotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
 
         while( !auxIt.IsAtEnd() )
         {
+            if (auxIt.Get()!=static_cast<InputPixelType>(0)) {
+
                 neighborAux = static_cast<InputPixelType>(0.0);
                 for (unsigned int idx = 0; idx < pow(laplaceIt.GetSize()[0],InputImageDimension); ++idx) {
                     center_value = laplaceIt.GetCenterPixel();
@@ -89,8 +91,12 @@ AnisotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
                     auxIt.Set(static_cast<InputPixelType>(meanNeighbors(laplaceIt)));
                 }
 
-            ++auxIt;
-            ++laplaceIt;
+                ++auxIt;
+                ++laplaceIt;
+            }else{
+                ++auxIt;
+                ++laplaceIt;
+            }
         }
 
         outputIt.GoToBegin();

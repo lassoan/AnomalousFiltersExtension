@@ -74,7 +74,7 @@ private:
 } // end namespace itk
 
 #ifndef ITK_MANUAL_INSTANTIATION
-#include "IsotropicAnomalousDiffusionImageFilter.hxx"
+#include "itkIsotropicAnomalousDiffusionImageFilter.hxx"
 #endif
 
 #endif

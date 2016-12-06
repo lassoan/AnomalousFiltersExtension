@@ -1,6 +1,6 @@
 #ifndef __itkIsotropicAnomalousDiffusionImageFilter_hxx
 #define __itkIsotropicAnomalousDiffusionImageFilter_hxx
-#include "IsotropicAnomalousDiffusionImageFilter.h"
+#include "itkIsotropicAnomalousDiffusionImageFilter.h"
 
 #include <itkImage.h>
 #include <itkImageRegionIterator.h>
@@ -73,15 +73,21 @@ IsotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
 
         while( !auxIt.IsAtEnd() )
         {
-            neighborAux = static_cast<InputPixelType>(0.0);
+            if (auxIt.Get()!=static_cast<InputPixelType>(0)) {
 
-            for (unsigned int idx = 0; idx < pow(laplaceIt.GetSize()[0],OutputImageDimension); ++idx) {
-                neighborAux += pow(laplaceIt.GetPixel(idx), 2.0 - m_Q)*laplaceOp.GetElement(idx);
+                neighborAux = static_cast<InputPixelType>(0.0);
+
+                for (unsigned int idx = 0; idx < pow(laplaceIt.GetSize()[0],OutputImageDimension); ++idx) {
+                    neighborAux += pow(laplaceIt.GetPixel(idx), 2.0 - m_Q)*laplaceOp.GetElement(idx);
+                }
+                auxIt.Set(neighborAux*this->GeneralizedDiffCurve()*m_TimeStep + laplaceIt.GetCenterPixel());
+
+                ++auxIt;
+                ++laplaceIt;
+            }else{
+                ++auxIt;
+                ++laplaceIt;
             }
-            auxIt.Set(neighborAux*this->GeneralizedDiffCurve()*m_TimeStep + laplaceIt.GetCenterPixel());
-
-            ++auxIt;
-            ++laplaceIt;
         }
 
         outputIt.GoToBegin();

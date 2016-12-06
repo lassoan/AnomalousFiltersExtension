@@ -16,7 +16,7 @@
 
 #include "itkImageFileWriter.h"
 
-#include "IsotropicAnomalousDiffusionImageFilter.h"
+#include "itkIsotropicAnomalousDiffusionImageFilter.h"
 #include "itkCastImageFilter.h"
 
 #include "itkPluginUtilities.h"
