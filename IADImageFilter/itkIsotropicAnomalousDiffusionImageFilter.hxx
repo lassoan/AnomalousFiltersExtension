@@ -77,7 +77,7 @@ IsotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
 
                 neighborAux = static_cast<InputPixelType>(0.0);
 
-                for (unsigned int idx = 0; idx < pow(laplaceIt.GetSize()[0],OutputImageDimension); ++idx) {
+                for (unsigned int idx = 0; idx < pow(laplaceIt.GetSize()[0],static_cast< double >(OutputImageDimension)); ++idx) {
                     neighborAux += pow(laplaceIt.GetPixel(idx), 2.0 - m_Q)*laplaceOp.GetElement(idx);
                 }
                 auxIt.Set(neighborAux*this->GeneralizedDiffCurve()*m_TimeStep + laplaceIt.GetCenterPixel());

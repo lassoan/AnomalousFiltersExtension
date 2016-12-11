@@ -77,7 +77,7 @@ AnisotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
             if (auxIt.Get()!=static_cast<InputPixelType>(0)) {
 
                 neighborAux = static_cast<InputPixelType>(0.0);
-                for (unsigned int idx = 0; idx < pow(laplaceIt.GetSize()[0],InputImageDimension); ++idx) {
+                for (unsigned int idx = 0; idx < pow(laplaceIt.GetSize()[0],static_cast< double >(InputImageDimension)); ++idx) {
                     center_value = laplaceIt.GetCenterPixel();
                     next_value =  laplaceIt.GetPixel(idx);
                     edgeController = this->EdgeWeightedController(next_value, center_value);
