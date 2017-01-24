@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+  <category>Filtering.Anomalous Filters</category>
+  <title>AAD on Diffusion Weighted Data</title>
+  <description><![CDATA[This is a CLI module that can be bundled in an extension]]></description>
+  <version>1.0.0</version>
+  <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/AADDiffusionWeightedData</documentation-url>
+  <license>Slicer</license>
+  <contributor>Antonio Carlos Senra Filho (University of Sao Paulo), Luiz Otavio Murta Junior (University of Sao Paulo)</contributor>
+  <acknowledgements>This work was funded by CAPES, a Brazilian Finantial Agency</acknowledgements>
+  <parameters>
+    <label>IO</label>
+    <description><![CDATA[Input/output parameters]]></description>    
+    <image type="diffusion-weighted">
+      <name>inputVolume</name>
+      <label>Input Volume</label>
+      <channel>input</channel>
+      <index>0</index>
+      <description><![CDATA[Input volume]]></description>
+    </image>
+    <image type="diffusion-weighted">
+      <name>outputVolume</name>
+      <label>Output Volume</label>
+      <channel>output</channel>
+      <index>1</index>
+      <description><![CDATA[Output Volume]]></description>
+    </image>
+  </parameters>
+  <parameters>
+    <label>Diffusion Parameters</label>
+    <description><![CDATA[Diffusion filter parameters]]></description>
+    <double>
+      <name>condutance</name>
+      <longflag>--condutance</longflag>
+      <flag>c</flag>
+      <label>Condutance</label>
+      <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
+      <default>5</default>
+      <constraints>
+        <minimum>0</minimum>
+        <maximum>20</maximum>
+        <step>0.01</step>
+      </constraints>
+    </double>
+    <integer>
+      <name>iterations</name>
+      <longflag>--iterations</longflag>
+      <flag>i</flag>
+      <label>Number of Iterations</label>
+      <description><![CDATA[A integer value that defines the number of iterations.]]></description>
+      <default>1</default>
+      <constraints>
+        <minimum>1</minimum>
+        <maximum>100</maximum>
+        <step>1</step>
+      </constraints>
+    </integer>
+    <double>
+      <name>timeStep</name>
+      <longflag>--timestep</longflag>
+      <flag>t</flag>
+      <label>Time Step</label>
+      <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
+      <default>0.0625</default>
+      <constraints>
+        <minimum>0.0015</minimum>
+        <maximum>0.0625</maximum>
+        <step>0.001</step>
+      </constraints>
+    </double>
+    <double>
+      <name>q</name>
+      <longflag>--anomalousparameter</longflag>
+      <flag>q</flag>
+      <label>Anomalous Parameter</label>
+      <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
+      <default>1.0</default>
+      <constraints>
+        <minimum>0.0</minimum>
+        <maximum>2.0</maximum>
+        <step>0.01</step>
+      </constraints>
+    </double>
+</parameters>
+</executable>
