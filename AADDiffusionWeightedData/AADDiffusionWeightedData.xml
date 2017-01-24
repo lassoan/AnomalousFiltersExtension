@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
-  <category>Filtering.Anomalous Filters</category>
+  <category>Filtering.Denoising</category>
   <title>AAD on Diffusion Weighted Data</title>
   <description><![CDATA[This is a CLI module that can be bundled in an extension]]></description>
   <version>1.0.0</version>
   <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/AADDiffusionWeightedData</documentation-url>
   <license>Slicer</license>
   <contributor>Antonio Carlos Senra Filho (University of Sao Paulo), Luiz Otavio Murta Junior (University of Sao Paulo)</contributor>
-  <acknowledgements>This work was funded by CAPES, a Brazilian Finantial Agency</acknowledgements>
+  <acknowledgements>This work was partially funded by CNPq grant 201871/2015-7/SWE and CAPES</acknowledgements>
   <parameters>
     <label>IO</label>
     <description><![CDATA[Input/output parameters]]></description>    

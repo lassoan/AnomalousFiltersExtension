@@ -1,4 +1,3 @@
-#include "AnisotropicAnomalousDiffusionImageFilter.h"
 
 #include "itkPluginUtilities.h"
 
@@ -6,6 +5,8 @@
 #include "itkComposeImageFilter.h"
 #include <itkMinimumMaximumImageCalculator.h>
 #include <itkRescaleIntensityImageFilter.h>
+#include "itkCastImageFilter.h"
+#include "itkAnisotropicAnomalousDiffusionImageFilter.h"
 #include "itkVectorIndexSelectionCastImageFilter.h"
 
 #include "AADDiffusionWeightedDataCLP.h"
@@ -44,8 +45,8 @@ int DoIt( int argc, char * argv[], T )
     unsigned int numberOfGradientImages = 0;
     bool readb0 = false;
     double b0 = 0;
-    typedef unsigned short                      PixelType;
-    typedef itk::VectorImage<unsigned short, Dimension> ImageType;
+    typedef float                      PixelType;
+    typedef itk::VectorImage<PixelType, Dimension> ImageType;
     itk::ImageFileReader<ImageType>::Pointer reader
             = itk::ImageFileReader<ImageType>::New();
     ImageType::Pointer img;
@@ -158,6 +159,12 @@ int DoIt( int argc, char * argv[], T )
 
     typedef itk::AnisotropicAnomalousDiffusionImageFilter<GradientImageType,GradientImageType> FilterType;
 
+    typedef    T OutputPixelType;
+
+//    typedef itk::Image<float,  3> InputImageType;
+//    typedef itk::Image<OutputPixelType, 3> OutputImageType;
+
+//    typedef itk::CastImageFilter<InputImageType, OutputImageType>       CastInput2OutputType;
     typedef itk::RescaleIntensityImageFilter<GradientImageType> RescalerType;
     typedef itk::MinimumMaximumImageCalculator<GradientImageType> MinMaxCalcType;
     typename MinMaxCalcType::Pointer imgValues = MinMaxCalcType::New();
@@ -168,9 +175,11 @@ int DoIt( int argc, char * argv[], T )
         imgValues->SetImage(imageContainer[vol]);
         imgValues->Compute();
         rescaler->SetInput(imageContainer[vol]);
-        rescaler->SetOutputMaximum(static_cast<GradientImageType::PixelType>(255));
-        rescaler->SetOutputMinimum(static_cast<GradientImageType::PixelType>(0));
+        rescaler->SetOutputMaximum(static_cast<PixelType>(255));
+        rescaler->SetOutputMinimum(static_cast<PixelType>(0));
+        rescaler->Update();
 
+        std::cout<<"filtering volume "<<vol<<std::endl;
         filter->SetInput(rescaler->GetOutput());
         filter->SetIterations(iterations);
         filter->SetQ(q);
@@ -181,17 +190,17 @@ int DoIt( int argc, char * argv[], T )
         rescaler->SetInput(filter->GetOutput());
         rescaler->SetOutputMaximum(imgValues->GetMaximum());
         rescaler->SetOutputMinimum(imgValues->GetMinimum());
+        rescaler->Update();
+
         scalar2vector->SetInput(vol, rescaler->GetOutput());
     }
 
     scalar2vector->Update();
     typename itk::NrrdImageIO::Pointer io = itk::NrrdImageIO::New();
 
-    itk::MetaDataDictionary metaDataDictionary;
-    metaDataDictionary = reader->GetMetaDataDictionary();
-
     io->SetFileTypeToBinary();
-    io->SetMetaDataDictionary( metaDataDictionary );
+    io->SetMetaDataDictionary( imgMetaDictionary );
+
     typedef itk::ImageFileWriter<ImageType> WriterType;
     typename WriterType::Pointer nrrdWriter = WriterType::New();
     nrrdWriter->UseInputMetaDataDictionaryOff();
@@ -204,7 +213,6 @@ int DoIt( int argc, char * argv[], T )
     std::cout << "success = " << EXIT_SUCCESS << std::endl;
 
     return EXIT_SUCCESS;
-
 }
 
 } // end of anonymous namespace
