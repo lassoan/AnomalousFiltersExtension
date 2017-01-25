@@ -1,13 +1,27 @@
+/*
+   Copyright 2016 Antonio Carlos da Silva Senra Filho
 
-#include "itkPluginUtilities.h"
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
+//#include "itkPluginUtilities.h"
 
 #include <itkMetaDataObject.h>
 #include "itkComposeImageFilter.h"
 #include <itkMinimumMaximumImageCalculator.h>
 #include <itkRescaleIntensityImageFilter.h>
-#include "itkCastImageFilter.h"
+//#include "itkCastImageFilter.h"
 #include "itkAnisotropicAnomalousDiffusionImageFilter.h"
-#include "itkVectorIndexSelectionCastImageFilter.h"
+//#include "itkVectorIndexSelectionCastImageFilter.h"
 
 #include "AADDiffusionWeightedDataCLP.h"
 
@@ -46,10 +60,10 @@ int DoIt( int argc, char * argv[], T )
     bool readb0 = false;
     double b0 = 0;
     typedef float                      PixelType;
-    typedef itk::VectorImage<PixelType, Dimension> ImageType;
-    itk::ImageFileReader<ImageType>::Pointer reader
-            = itk::ImageFileReader<ImageType>::New();
-    ImageType::Pointer img;
+    typedef itk::VectorImage<PixelType, Dimension> DiffusionImageType;
+    itk::ImageFileReader<DiffusionImageType>::Pointer reader
+            = itk::ImageFileReader<DiffusionImageType>::New();
+    DiffusionImageType::Pointer img;
 
     reader->SetFileName(inputVolume.c_str());
     try
@@ -127,17 +141,18 @@ int DoIt( int argc, char * argv[], T )
     }
 
     typedef itk::Image< PixelType, Dimension > ReferenceImageType;
-    typedef ReferenceImageType                 GradientImageType;
+    typedef ReferenceImageType                 ScalarImageType;
 
-    std::vector< GradientImageType::Pointer > imageContainer;
+    std::vector< ScalarImageType::Pointer > imageContainer;
 
-    typedef itk::ImageRegionConstIterator< ImageType >         DWIIteratorType;
+    typedef itk::ImageRegionConstIterator< DiffusionImageType >         DWIIteratorType;
     DWIIteratorType dwiit( img, img->GetBufferedRegion() );
-    typedef itk::ImageRegionIterator< GradientImageType > IteratorType;
+    typedef itk::ImageRegionIterator< ScalarImageType > IteratorType;
 
+    //Split Diffusion dataset in individuals volumes (references and gradients)
     for( unsigned int i = 0; i<numberOfImages; i++ )
     {
-        GradientImageType::Pointer image = GradientImageType::New();
+        ScalarImageType::Pointer image = ScalarImageType::New();
         image->CopyInformation( img );
         image->SetBufferedRegion( img->GetBufferedRegion() );
         image->SetRequestedRegion( img->GetRequestedRegion() );
@@ -154,19 +169,13 @@ int DoIt( int argc, char * argv[], T )
         imageContainer.push_back( image );
     }
 
-    typedef itk::ComposeImageFilter<GradientImageType,ImageType> ScalarToVectorFilterType;
+    //Apply the Anisotropic Anomalous Filter on each volume
+    typedef itk::AnisotropicAnomalousDiffusionImageFilter<ScalarImageType,ScalarImageType> FilterType;
+
+    typedef itk::ComposeImageFilter<ScalarImageType,DiffusionImageType> ScalarToVectorFilterType;
     typename ScalarToVectorFilterType::Pointer scalar2vector = ScalarToVectorFilterType::New();
-
-    typedef itk::AnisotropicAnomalousDiffusionImageFilter<GradientImageType,GradientImageType> FilterType;
-
-    typedef    T OutputPixelType;
-
-//    typedef itk::Image<float,  3> InputImageType;
-//    typedef itk::Image<OutputPixelType, 3> OutputImageType;
-
-//    typedef itk::CastImageFilter<InputImageType, OutputImageType>       CastInput2OutputType;
-    typedef itk::RescaleIntensityImageFilter<GradientImageType> RescalerType;
-    typedef itk::MinimumMaximumImageCalculator<GradientImageType> MinMaxCalcType;
+    typedef itk::RescaleIntensityImageFilter<ScalarImageType> RescalerType;
+    typedef itk::MinimumMaximumImageCalculator<ScalarImageType> MinMaxCalcType;
     typename MinMaxCalcType::Pointer imgValues = MinMaxCalcType::New();
 
     for (int vol = 0; vol < numberOfImages; ++vol) {
@@ -179,7 +188,7 @@ int DoIt( int argc, char * argv[], T )
         rescaler->SetOutputMinimum(static_cast<PixelType>(0));
         rescaler->Update();
 
-        std::cout<<"filtering volume "<<vol<<std::endl;
+        std::cout<<"AAD filtering: Volume "<<vol<<std::endl;
         filter->SetInput(rescaler->GetOutput());
         filter->SetIterations(iterations);
         filter->SetQ(q);
@@ -195,13 +204,14 @@ int DoIt( int argc, char * argv[], T )
         scalar2vector->SetInput(vol, rescaler->GetOutput());
     }
 
+    //Write the output filtered DWI dataset
     scalar2vector->Update();
     typename itk::NrrdImageIO::Pointer io = itk::NrrdImageIO::New();
 
     io->SetFileTypeToBinary();
     io->SetMetaDataDictionary( imgMetaDictionary );
 
-    typedef itk::ImageFileWriter<ImageType> WriterType;
+    typedef itk::ImageFileWriter<DiffusionImageType> WriterType;
     typename WriterType::Pointer nrrdWriter = WriterType::New();
     nrrdWriter->UseInputMetaDataDictionaryOff();
     nrrdWriter->SetImageIO(io);
