@@ -40,6 +40,8 @@ SEMMacroBuildCLI(
   ADDITIONAL_SRCS ${MODULE_SRCS}
 itkAnisotropicAnomalousDiffusionImageFilter.h
 itkAnisotropicAnomalousDiffusionImageFilter.hxx
+itkDiffusionEdgeOptimizationImageCalculator.h
+itkDiffusionEdgeOptimizationImageCalculator.hxx
   )
 
 #-----------------------------------------------------------------------------

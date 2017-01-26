@@ -13,15 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-//#include "itkPluginUtilities.h"
-
 #include <itkMetaDataObject.h>
 #include "itkComposeImageFilter.h"
 #include <itkMinimumMaximumImageCalculator.h>
 #include <itkRescaleIntensityImageFilter.h>
-//#include "itkCastImageFilter.h"
 #include "itkAnisotropicAnomalousDiffusionImageFilter.h"
-//#include "itkVectorIndexSelectionCastImageFilter.h"
+#include "itkDiffusionEdgeOptimizationImageCalculator.h"
 
 #include "AADDiffusionWeightedDataCLP.h"
 
@@ -30,9 +27,6 @@
 
 // ITK includes
 #include <itkCastImageFilter.h>
-
-#include <iostream>
-
 #include "itkDiffusionTensor3DReconstructionImageFilter.h"
 #include "itkNrrdImageIO.h"
 #include "itkImageSeriesReader.h"
@@ -192,7 +186,23 @@ int DoIt( int argc, char * argv[], T )
         filter->SetInput(rescaler->GetOutput());
         filter->SetIterations(iterations);
         filter->SetQ(q);
-        filter->SetCondutance(condutance);
+        if (useAutoConductance) {
+            typedef itk::DiffusionEdgeOptimizationImageCalculator<ScalarImageType>   ConductanceOptimizationCalculator;
+            typename ConductanceOptimizationCalculator::Pointer optKappa = ConductanceOptimizationCalculator::New();
+            optKappa->SetImage(rescaler->GetOutput());
+            if (optFunction=="Canny") {
+                optKappa->SetOptimizationMethod(ConductanceOptimizationCalculator::CANNY);
+            }else if (optFunction=="MAD") {
+                optKappa->SetOptimizationMethod(ConductanceOptimizationCalculator::MAD);
+            }else if (optFunction=="Morphological") {
+                optKappa->SetOptimizationMethod(ConductanceOptimizationCalculator::MORPHOLOGICAL);
+            }
+            optKappa->Compute();
+            filter->SetCondutance(optKappa->GetKappa());
+//            std::cout<<optKappa->GetKappa()<<std::endl;
+        }else{
+            filter->SetCondutance(conductance);
+        }
         filter->SetTimeStep(timeStep);
         filter->Update();
 

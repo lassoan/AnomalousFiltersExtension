@@ -17,6 +17,7 @@
 #include "itkImageFileWriter.h"
 
 #include "itkAnisotropicAnomalousDiffusionImageFilter.h"
+#include "itkDiffusionEdgeOptimizationImageCalculator.h"
 #include "itkRescaleIntensityImageFilter.h"
 #include "itkMinimumMaximumImageCalculator.h"
 #include "itkCastImageFilter.h"
@@ -64,7 +65,28 @@ int DoIt( int argc, char * argv[], T )
     typename FilterType::Pointer filter = FilterType::New();
     itk::PluginFilterWatcher watchFilter(filter, "Anisotropic Anomalous Diffusion",CLPProcessInformation);
     filter->SetInput(input_rescaler->GetOutput());
-    filter->SetCondutance(condutance);
+    if (useAutoConductance) {
+        std::cout<<"Automatic conductance adjustment...";
+        typedef itk::DiffusionEdgeOptimizationImageCalculator<InputImageType>   ConductanceOptimizationCalculator;
+        typename ConductanceOptimizationCalculator::Pointer optKappa = ConductanceOptimizationCalculator::New();
+        optKappa->SetImage(input_rescaler->GetOutput());
+        if (optFunction=="Canny") {
+            optKappa->SetOptimizationMethod(ConductanceOptimizationCalculator::CANNY);
+            std::cout<<"Canny method - Conductance = ";
+        }else if (optFunction=="MAD") {
+            optKappa->SetOptimizationMethod(ConductanceOptimizationCalculator::MAD);
+            std::cout<<"MAD method - Conductance = ";
+        }else if (optFunction=="Morphological") {
+            optKappa->SetOptimizationMethod(ConductanceOptimizationCalculator::MORPHOLOGICAL);
+            std::cout<<"Morphological method - Conductance = ";
+        }
+        optKappa->Compute();
+        filter->SetCondutance(optKappa->GetKappa());
+        std::cout<<optKappa->GetKappa()<<std::endl;
+    }else{
+        std::cout<<"Manual conductance adjustment - Conductance = "<<conductance<<std::endl;
+        filter->SetCondutance(conductance);
+    }
     filter->SetIterations(iterations);
     filter->SetTimeStep(timeStep);
     filter->SetQ(q);

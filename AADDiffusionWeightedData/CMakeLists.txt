@@ -39,6 +39,10 @@ SEMMacroBuildCLI(
   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
   INCLUDE_DIRECTORIES ${MODULE_INCLUDE_DIRECTORIES}
   ADDITIONAL_SRCS ${MODULE_SRCS}
+itkAnisotropicAnomalousDiffusionImageFilter.h
+itkAnisotropicAnomalousDiffusionImageFilter.hxx
+itkDiffusionEdgeOptimizationImageCalculator.h
+itkDiffusionEdgeOptimizationImageCalculator.hxx
   )
 
 #-----------------------------------------------------------------------------

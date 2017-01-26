@@ -2,7 +2,7 @@
 <executable>
   <category>Filtering.Denoising</category>
   <title>AAD on Diffusion Weighted Data</title>
-  <description><![CDATA[This is a CLI module that can be bundled in an extension]]></description>
+  <description><![CDATA[This is a CLI module that is bundled in the Anomalous Diffusion Filters extension. Here, the Anisotropic Anomalous Diffusion filter (AAD) is applied on diffusion MRI data.]]></description>
   <version>1.0.0</version>
   <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/AADDiffusionWeightedData</documentation-url>
   <license>Slicer</license>
@@ -29,19 +29,31 @@
   <parameters>
     <label>Diffusion Parameters</label>
     <description><![CDATA[Diffusion filter parameters]]></description>
-    <double>
-      <name>condutance</name>
-      <longflag>--condutance</longflag>
+    <float>
+      <name>conductance</name>
+      <longflag>--conductance</longflag>
       <flag>c</flag>
-      <label>Condutance</label>
-      <description><![CDATA[A integer value for edge preservation adjustment.]]></description>
+      <label>Conductance</label>
+      <description><![CDATA[A float value for edge preservation adjustment.]]></description>
       <default>5</default>
-      <constraints>
-        <minimum>0</minimum>
-        <maximum>20</maximum>
-        <step>0.01</step>
-      </constraints>
-    </double>
+    </float>
+    <boolean>
+	<name>useAutoConductance</name>
+	<longflag>--useAutoConductance</longflag>
+	<description><![CDATA[Choose if you want to use an automatic adjustment of conductance parameter. If this is checked, the inserted value is ignored and the optimization function below is used.]]></description>
+	<label>Use Automatic Conductance</label>
+	<default>false</default>
+    </boolean>
+    <string-enumeration>
+      <name>optFunction</name>
+	<longflag>--optFunction</longflag>
+	<description><![CDATA[A set of optimization function for automatic estimation of conductance parameter. This is helpful is you do not have an initial guess on what value is appropriate to the conductance setting.]]></description>
+	<label>Optimization Function</label>
+	<default>Canny</default>
+	<element>Canny</element>
+   	<element>MAD</element>
+	<element>Morphological</element>
+    </string-enumeration>
     <integer>
       <name>iterations</name>
       <longflag>--iterations</longflag>
