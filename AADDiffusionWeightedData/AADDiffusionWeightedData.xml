@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
   <category>Filtering.Denoising</category>
-  <title>AAD on Diffusion Weighted Data</title>
+  <title>AAD Diffusion Weighted Data</title>
   <description><![CDATA[This is a CLI module that is bundled in the Anomalous Diffusion Filters extension. Here, the Anisotropic Anomalous Diffusion filter (AAD) is applied on diffusion MRI data.]]></description>
   <version>1.0.0</version>
   <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/AADDiffusionWeightedData</documentation-url>
