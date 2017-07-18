@@ -76,8 +76,8 @@
       <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
       <default>1.0</default>
       <constraints>
-        <minimum>0.0</minimum>
-        <maximum>2.0</maximum>
+        <minimum>0.01</minimum>
+        <maximum>1.99</maximum>
         <step>0.01</step>
       </constraints>
     </double>
