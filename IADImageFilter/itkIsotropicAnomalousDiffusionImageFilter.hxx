@@ -24,7 +24,7 @@ IsotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
     m_Q = 1.0;
     m_GeneralizedDiffusion = 1.0;
     m_Iterations = 1;
-    m_TimeStep = (1.0 / pow(2.0,static_cast<double>(InputImageDimension)+1));
+    m_TimeStep = (1.0 / pow((double)(2.0),static_cast<double>(InputImageDimension)+1));
 }
 
 template< typename TInputImage, typename TOutputImage >
@@ -77,8 +77,8 @@ IsotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
 
                 neighborAux = static_cast<InputPixelType>(0.0);
 
-                for (unsigned int idx = 0; idx < pow(laplaceIt.GetSize()[0],static_cast< double >(OutputImageDimension)); ++idx) {
-                    neighborAux += pow(laplaceIt.GetPixel(idx), 2.0 - m_Q)*laplaceOp.GetElement(idx);
+                for (unsigned int idx = 0; idx < pow((double)(laplaceIt.GetSize()[0]),static_cast< double >(OutputImageDimension)); ++idx) {
+                    neighborAux += pow((double)(laplaceIt.GetPixel(idx)), (double)(2.0 - m_Q))*laplaceOp.GetElement(idx);
                 }
                 auxIt.Set(neighborAux*this->GeneralizedDiffCurve()*m_TimeStep + laplaceIt.GetCenterPixel());
 
@@ -104,12 +104,12 @@ template< typename TInputImage, typename TOutputImage >
 void IsotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
 ::TimeStepTestStability()
 {
-    if ( m_TimeStep >  ( 1.0 / pow(2.0, static_cast< double >( InputImageDimension ) +1) ))
+    if ( m_TimeStep >  ( 1.0 / pow((double)(2.0), static_cast< double >( InputImageDimension ) +1) ))
     {
         itkWarningMacro( << "Isotropic diffusion unstable time step: "
                          << m_TimeStep << endl
                          << "Stable time step for this image must be smaller than "
-                         << 1.0 / pow( 2.0, static_cast< double >( InputImageDimension ) +1 ) );
+                         << 1.0 / pow((double)(2.0), static_cast< double >( InputImageDimension ) +1 ) );
     }
 }
 
@@ -122,9 +122,9 @@ double IsotropicAnomalousDiffusionImageFilter<TInputImage, TOutputImage >
     double alpha = (2.0 - m_Q)*(3.0 - m_Q);
     if (m_Q < 1.0) {
         //            d = 2*Math.pow(alpha, 2/(3-q))*Math.pow(Math.sqrt((1 - q) / Math.PI) * (gamma(1 + (1 / (1 - q))) / gamma(3 / 2 + (1 / (1 - q)))), ((2 - 2 * q) / (3 - q)));
-        d = m_GeneralizedDiffusion * exp((-1.0) * (pow(m_Q - 1.0, 2.0)) / 0.08);
+        d = m_GeneralizedDiffusion * exp((-1.0) * (pow((double)(m_Q - 1.0), (double)(2.0 / 0.08))));
     } else if (m_Q >= 1.0 && m_Q < 2.0) {
-        d = m_GeneralizedDiffusion * pow(alpha, 2.0 / (3.0 - m_Q)) * pow(sqrt((m_Q - 1.0) / M_PI) * (tgamma(1.0 / (m_Q - 1.0)) / tgamma((1.0 / (m_Q - 1.0)) - 1.0 / 2.0)), ((2.0 - 2.0 * m_Q) / (3.0 - m_Q)));
+        d = m_GeneralizedDiffusion * pow((double)(alpha), (double)(2.0 / (3.0 - m_Q))) * pow((double)(sqrt((m_Q - 1.0) / M_PI) * (tgamma(1.0 / (m_Q - 1.0)) / tgamma((1.0 / (m_Q - 1.0)) - 1.0 / 2.0))), (double)(((2.0 - 2.0 * m_Q) / (3.0 - m_Q))));
         //            d = percentD * Math.exp((-1) * (Math.pow(q - 1.0, 2.0)) / 0.4);
     } else if (m_Q == 1.0) {
         d = m_GeneralizedDiffusion;

@@ -62,7 +62,6 @@ int DoIt( int argc, char * argv[], T )
     typename MinMaxCalcType::Pointer imgValues = MinMaxCalcType::New();
     imgValues->SetImage(reader->GetOutput());
     imgValues->Compute();
-    std::cout<<imgValues->GetMinimum()<<" "<<std::cout<<imgValues->GetMaximum();
 
     typename RescalerInputFilterType::Pointer input_rescaler = RescalerInputFilterType::New();
     input_rescaler->SetInput(reader->GetOutput());
@@ -80,8 +79,6 @@ int DoIt( int argc, char * argv[], T )
 
     typename CastInput2OutputType::Pointer cast = CastInput2OutputType::New();
     cast->SetInput( filter->GetOutput() );
-
-
 
     typename RescalerOutputFilterType::Pointer output_rescaler = RescalerOutputFilterType::New();
     output_rescaler->SetInput(cast->GetOutput());
