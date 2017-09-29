@@ -198,8 +198,13 @@ int DoIt( int argc, char * argv[], T )
                 optKappa->SetOptimizationMethod(ConductanceOptimizationCalculator::MORPHOLOGICAL);
             }
             optKappa->Compute();
-            filter->SetConductance(optKappa->GetKappa());
-//            std::cout<<optKappa->GetKappa()<<std::endl;
+            if (q!=1.0) {
+                filter->SetConductance(optKappa->GetKappa()*(std::abs(1.0-q))*10.0);
+                std::cout<<"Optimum kappa value estimate: "<<optKappa->GetKappa()*(std::abs(1.0-q))*10.0<<std::endl;
+            }else {
+                filter->SetConductance(optKappa->GetKappa());
+                std::cout<<"Optimum kappa value estimate: "<<optKappa->GetKappa()<<std::endl;
+            }
         }else{
             filter->SetConductance(conductance);
         }
