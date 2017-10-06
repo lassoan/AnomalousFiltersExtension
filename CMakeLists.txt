@@ -21,6 +21,7 @@ include(${Slicer_USE_FILE})
 add_subdirectory(AADImageFilter)
 add_subdirectory(IADImageFilter)
 add_subdirectory(AADDiffusionWeightedData)
+add_subdirectory(AADEPIData)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------
