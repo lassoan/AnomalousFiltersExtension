@@ -13,10 +13,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-#ifndef itkDiffusionEdgeOptimizationImageCalculator_hxx
-#define itkDiffusionEdgeOptimizationImageCalculator_hxx
+#ifndef itkAutomaticConductanceImageCalculator_hxx
+#define itkAutomaticConductanceImageCalculator_hxx
 
-#include "itkDiffusionEdgeOptimizationImageCalculator.h"
+#include "itkAutomaticConductanceImageCalculator.h"
 #include "itkNumericTraits.h"
 
 //Canny noise estimator
@@ -40,8 +40,8 @@ namespace itk
  * Constructor
  */
 template< typename TInputImage >
-DiffusionEdgeOptimizationImageCalculator< TInputImage >
-::DiffusionEdgeOptimizationImageCalculator()
+AutomaticConductanceImageCalculator< TInputImage >
+::AutomaticConductanceImageCalculator()
 {
     m_Image = TInputImage::New();
     m_Kappa = static_cast<PixelType>(1);
@@ -54,7 +54,7 @@ DiffusionEdgeOptimizationImageCalculator< TInputImage >
  */
 template< typename TInputImage >
 void
-DiffusionEdgeOptimizationImageCalculator< TInputImage >
+AutomaticConductanceImageCalculator< TInputImage >
 ::Compute(void)
 {
     if ( !m_RegionSetByUser )
@@ -79,19 +79,13 @@ DiffusionEdgeOptimizationImageCalculator< TInputImage >
 
 template< typename TInputImage >
 void
-DiffusionEdgeOptimizationImageCalculator< TInputImage >
+AutomaticConductanceImageCalculator< TInputImage >
 ::ComputeCanny(ImageConstPointer image)
 {
     //Gradient magnitude
     typedef itk::GradientMagnitudeImageFilter<TInputImage, TInputImage>   GradientFilter;
     typename GradientFilter::Pointer gradient = GradientFilter::New();
     gradient->SetInput(image);
-
-    //Image statistics
-    typedef itk::StatisticsImageFilter<TInputImage>    StatisticsFilter;
-    typename StatisticsFilter::Pointer statImage = StatisticsFilter::New();
-    statImage->SetInput(gradient->GetOutput());
-    statImage->Update();
 
     //Gradient magnitude histogram
     const unsigned int MeasurementVectorSize = 1; // Grayscale
@@ -116,15 +110,15 @@ DiffusionEdgeOptimizationImageCalculator< TInputImage >
 
     typename ImageToHistogramFilterType::HistogramType* histogramG = gradToHist->GetOutput();
 
-    double cumulativeSum = 0.0, total = 0.0, percentage = 0.0;
+    double cumulativeSum = 0.0, total = 0.0;
     for (int idx = 0; idx < histogramG->GetSize()[0]; ++idx) {
         total+=histogramG->GetFrequency(idx);
     }
 
     for (int idx = 0; idx < histogramG->GetSize()[0]; ++idx) {
         cumulativeSum+=histogramG->GetFrequency(idx);
-        percentage += cumulativeSum/total;
-        if (percentage > 0.9) {
+        double percentage = cumulativeSum/total;
+        if (percentage >= 0.9) {
             m_Kappa = static_cast<PixelType>(histogramG->GetBinMinFromValue(0,histogramG->GetMeasurement(idx,0)));
             break;
         }
@@ -133,7 +127,7 @@ DiffusionEdgeOptimizationImageCalculator< TInputImage >
 
 template< typename TInputImage >
 void
-DiffusionEdgeOptimizationImageCalculator< TInputImage >
+AutomaticConductanceImageCalculator< TInputImage >
 ::ComputeMAD(ImageConstPointer image)
 {
     // K = 1.4826 median( |gradI - median(gradI)| )
@@ -172,7 +166,7 @@ DiffusionEdgeOptimizationImageCalculator< TInputImage >
 
 template< typename TInputImage >
 void
-DiffusionEdgeOptimizationImageCalculator< TInputImage >
+AutomaticConductanceImageCalculator< TInputImage >
 ::ComputeMorphological(ImageConstPointer image)
 {
     // K = average(opening(I,s)) - average(closing(I,s))
@@ -212,7 +206,7 @@ DiffusionEdgeOptimizationImageCalculator< TInputImage >
 
 template< typename TInputImage >
 void
-DiffusionEdgeOptimizationImageCalculator< TInputImage >
+AutomaticConductanceImageCalculator< TInputImage >
 ::SetRegion(const RegionType & region)
 {
     m_Region = region;
@@ -221,7 +215,7 @@ DiffusionEdgeOptimizationImageCalculator< TInputImage >
 
 template< typename TInputImage >
 void
-DiffusionEdgeOptimizationImageCalculator< TInputImage >
+AutomaticConductanceImageCalculator< TInputImage >
 ::PrintSelf(std::ostream & os, Indent indent) const
 {
     Superclass::PrintSelf(os, indent);

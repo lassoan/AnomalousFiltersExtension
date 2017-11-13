@@ -6,7 +6,7 @@
 #include "itkRescaleIntensityImageFilter.h"
 #include "itkMinimumMaximumImageCalculator.h"
 #include "itkAnisotropicAnomalousDiffusionImageFilter.h"
-#include "itkDiffusionEdgeOptimizationImageCalculator.h"
+#include "itkAutomaticConductanceImageCalculator.h"
 
 // ITK includes
 #include "itkImageFileWriter.h"
@@ -115,7 +115,7 @@ int DoIt( int argc, char * argv[], TPixel )
         filter->SetIterations(iterations);
         filter->SetQ(q);
         if (useAutoConductance) {
-            typedef itk::DiffusionEdgeOptimizationImageCalculator<ScalarImageType>   ConductanceOptimizationCalculator;
+            typedef itk::AutomaticConductanceImageCalculator<ScalarImageType>   ConductanceOptimizationCalculator;
             typename ConductanceOptimizationCalculator::Pointer optKappa = ConductanceOptimizationCalculator::New();
             optKappa->SetImage(rescaler->GetOutput());
             if (optFunction=="Canny") {
@@ -127,8 +127,8 @@ int DoIt( int argc, char * argv[], TPixel )
             }
             optKappa->Compute();
             if (q!=1.0) {
-                filter->SetConductance(optKappa->GetKappa()*(std::abs(1.0-q))*10.0);
-                std::cout<<"Optimum kappa value estimate: "<<optKappa->GetKappa()*(std::abs(1.0-q))*10.0<<std::endl;
+                filter->SetConductance(optKappa->GetKappa());
+                std::cout<<"Optimum kappa value estimate: "<<optKappa->GetKappa()<<std::endl;
             }else {
                 filter->SetConductance(optKappa->GetKappa());
                 std::cout<<"Optimum kappa value estimate: "<<optKappa->GetKappa()<<std::endl;

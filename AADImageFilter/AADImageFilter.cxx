@@ -17,7 +17,7 @@
 #include "itkImageFileWriter.h"
 
 #include "itkAnisotropicAnomalousDiffusionImageFilter.h"
-#include "itkDiffusionEdgeOptimizationImageCalculator.h"
+#include "itkAutomaticConductanceImageCalculator.h"
 #include "itkRescaleIntensityImageFilter.h"
 #include "itkMinimumMaximumImageCalculator.h"
 #include "itkCastImageFilter.h"
@@ -67,7 +67,7 @@ int DoIt( int argc, char * argv[], T )
     filter->SetInput(input_rescaler->GetOutput());
     if (useAutoConductance) {
         std::cout<<"Automatic conductance adjustment...";
-        typedef itk::DiffusionEdgeOptimizationImageCalculator<InputImageType>   ConductanceOptimizationCalculator;
+        typedef itk::AutomaticConductanceImageCalculator<InputImageType>   ConductanceOptimizationCalculator;
         typename ConductanceOptimizationCalculator::Pointer optKappa = ConductanceOptimizationCalculator::New();
         optKappa->SetImage(input_rescaler->GetOutput());
         if (optFunction=="Canny") {

@@ -18,7 +18,7 @@
 #include <itkMinimumMaximumImageCalculator.h>
 #include <itkRescaleIntensityImageFilter.h>
 #include "itkAnisotropicAnomalousDiffusionImageFilter.h"
-#include "itkDiffusionEdgeOptimizationImageCalculator.h"
+#include "itkAutomaticConductanceImageCalculator.h"
 
 #include "AADDiffusionWeightedDataCLP.h"
 
@@ -187,7 +187,7 @@ int DoIt( int argc, char * argv[], T )
         filter->SetIterations(iterations);
         filter->SetQ(q);
         if (useAutoConductance) {
-            typedef itk::DiffusionEdgeOptimizationImageCalculator<ScalarImageType>   ConductanceOptimizationCalculator;
+            typedef itk::AutomaticConductanceImageCalculator<ScalarImageType>   ConductanceOptimizationCalculator;
             typename ConductanceOptimizationCalculator::Pointer optKappa = ConductanceOptimizationCalculator::New();
             optKappa->SetImage(rescaler->GetOutput());
             if (optFunction=="Canny") {
