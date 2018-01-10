@@ -81,8 +81,12 @@ int DoIt( int argc, char * argv[], T )
             std::cout<<"Morphological method - Conductance = ";
         }
         optKappa->Compute();
+
         filter->SetConductance(optKappa->GetKappa());
-        std::cout<<optKappa->GetKappa()<<std::endl;
+        if (useConductanceRegularization) {
+            filter->SetConductance(optKappa->GetKappa()/kappaRegFactor);
+        }
+        std::cout<<filter->GetConductance()<<std::endl;
     }else{
         std::cout<<"Manual conductance adjustment - Conductance = "<<conductance<<std::endl;
         filter->SetConductance(conductance);

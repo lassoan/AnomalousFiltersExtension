@@ -54,6 +54,21 @@
    	<element>MAD</element>
 	<element>Morphological</element>
     </string-enumeration>
+    <boolean>
+	<name>useConductanceRegularization</name>
+	<longflag>--useKappaReg</longflag>
+	<description><![CDATA[Choose if you want to use an conductance regularization factor in order to restrict the automatic conducante value. This is only used when the automatic conductance optimization is used.]]></description>
+	<label>Use Conductance Regularization</label>
+	<default>false</default>
+    </boolean>
+    <float>
+      <name>kappaRegFactor</name>
+      <longflag>--regFactor</longflag>
+      <flag>r</flag>
+      <label>Coductance Regularization Factor</label>
+      <description><![CDATA[A float value for coductance regularization factor.]]></description>
+      <default>2.0</default>
+    </float>
     <integer>
       <name>iterations</name>
       <longflag>--iterations</longflag>
