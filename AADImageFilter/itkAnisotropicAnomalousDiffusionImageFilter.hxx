@@ -5,6 +5,8 @@
 #include <itkImageRegionIterator.h>
 #include <itkImageRegionConstIterator.h>
 #include <itkLaplacianOperator.h>
+#include <itkGradientMagnitudeImageFilter.h>
+#include <itkImageToHistogramFilter.h>
 #include <cmath>
 
 #ifndef M_PI
@@ -21,9 +23,12 @@ AnisotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
 {
     m_Q = 1.0;
     m_Conductance = 1.0;
+    m_EdgeFunction = EXPONENTIAL;
+    m_Alpha = 0.1;
+    m_H = 0.98;
     m_Iterations = 1;
     m_GeneralizedDiffusion=1.0;
-    m_TimeStep = (1.0 / pow((double)(2.0),static_cast<double>(InputImageDimension) + 1));
+    m_TimeStep = (1.0 / pow(2.0,static_cast<double>(InputImageDimension) + 1));
 }
 
 template<typename TInputImage, typename TOutputImage>
@@ -42,6 +47,42 @@ AnisotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
 
     //Test the algorithm stability
     TimeStepTestStability();
+
+    //If LOGISTIC edge function is selected, the maximum gradient of the input image is acquired.
+    if (m_EdgeFunction == LOGISTIC) {
+        typedef itk::GradientMagnitudeImageFilter<InputImageType, InputImageType>   GradientType;
+        typename GradientType::Pointer grad = GradientType::New();
+        grad->SetInput(input);
+
+        typedef itk::Statistics::ImageToHistogramFilter< InputImageType >   HistogramFilterType;
+        typename HistogramFilterType::Pointer histogram =  HistogramFilterType::New();
+        typedef typename HistogramFilterType::HistogramSizeType   SizeType;
+        SizeType size( 1 );
+        size[0] = 255;
+        histogram->SetHistogramSize( size );
+        histogram->SetMarginalScale( 10.0 );
+        typename HistogramFilterType::HistogramMeasurementVectorType lowerBound( 1 );
+        typename HistogramFilterType::HistogramMeasurementVectorType upperBound( 1 );
+        lowerBound[0] = 0;
+        upperBound[0] = 256;
+        histogram->SetHistogramBinMinimum( lowerBound );
+        histogram->SetHistogramBinMaximum( upperBound );
+        histogram->SetInput(  grad->GetOutput()  );
+        histogram->Update();
+
+        typedef typename HistogramFilterType::HistogramType  HistogramType;
+        const HistogramType * gradHistogram = histogram->GetOutput();
+
+        unsigned int max_freq = 0;
+        for (unsigned int bin=1; bin < gradHistogram->Size(); ++bin)
+        {
+            //Find maximum gradient frequency, without counting the bin zero.
+            if (gradHistogram->GetFrequency(bin, 0)>max_freq) {
+                max_freq=gradHistogram->GetFrequency(bin);
+                maxGrad=gradHistogram->GetBinMax(0,bin);
+            }
+        }
+    }
 
     //Copy input image
     IteratorType outputIt(output, region);
@@ -77,11 +118,11 @@ AnisotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
             if (auxIt.Get()!=static_cast<InputPixelType>(0)) {
 
                 neighborAux = static_cast<InputPixelType>(0);
-                for (unsigned int idx = 0; idx < pow((double)(laplaceIt.GetSize()[0]),static_cast< double >(InputImageDimension)); ++idx) {
+                for (unsigned int idx = 0; idx < pow(laplaceIt.GetSize()[0],static_cast< double >(InputImageDimension)); ++idx) {
                     center_value = laplaceIt.GetCenterPixel();
                     next_value =  laplaceIt.GetPixel(idx);
-                    edgeController = this->EdgeWeightedController(next_value, center_value);
-                    derivative = pow((double)(next_value), (double)(2.0 - m_Q)) - pow((double)(center_value), (double)(2.0 - m_Q));
+                    edgeController = this->EdgeWeightedController(next_value, center_value, m_EdgeFunction, maxGrad);
+                    derivative = pow(next_value, 2.0 - m_Q) - pow(center_value, 2.0 - m_Q);
                     neighborAux += (idx%2==0?1.0:0.5)*edgeController*derivative;
                 }
                 diffusionPixelCorrected = neighborAux*static_cast<InputPixelType>(m_TimeStep) + laplaceIt.GetCenterPixel();
@@ -123,26 +164,45 @@ double AnisotropicAnomalousDiffusionImageFilter<TInputImage, TOutputImage >
 
 template< typename TInputImage, typename TOutputImage>
 double AnisotropicAnomalousDiffusionImageFilter<TInputImage, TOutputImage >
-::EdgeWeightedController(InputPixelType idxValue, InputPixelType centerValue)
+::EdgeWeightedController(InputPixelType idxValue, InputPixelType centerValue, unsigned int model, float maximumGradient)
 {
-    return  GeneralizedDiffCurve()*exp((-1.0)*pow(static_cast<double>(abs((idxValue - centerValue)))/static_cast<double>(m_Conductance),  2.0));
+    switch (model) {
+    case EXPONENTIAL:
+        return  GeneralizedDiffCurve()*exp((-1.0)*pow(static_cast<InputPixelType>(abs((idxValue - centerValue)))/static_cast<InputPixelType>(m_Conductance),  2.0));
+    case FRACTIONAL:
+        return  GeneralizedDiffCurve()*(1.0 / (1.0 + std::pow(static_cast<InputPixelType>(abs((idxValue - centerValue)))/static_cast<InputPixelType>(m_Conductance), 2.0)));
+    case LOGISTIC:
+        return  GeneralizedDiffCurve()*(1.0 / (1.0 + exp(-1.0*(static_cast<InputPixelType>(abs((idxValue - centerValue)))-static_cast<InputPixelType>(m_Conductance))/AlphaCalculation(maximumGradient))));
+    default:
+        //Wrong edge function set, then the EXPONENTIAL function is assumed
+        return GeneralizedDiffCurve()*exp((-1.0)*pow(static_cast<InputPixelType>(abs((idxValue - centerValue)))/static_cast<InputPixelType>(m_Conductance),  2.0));
+        break;
+    }
+}
+
+template< typename TInputImage, typename TOutputImage >
+float AnisotropicAnomalousDiffusionImageFilter<TInputImage, TOutputImage >
+::AlphaCalculation(float maximumGradient)
+{
+    m_Alpha=-1.0*abs((maximumGradient - static_cast<InputPixelType>(m_Conductance))/log((1.0 - static_cast<InputPixelType>(m_H))/static_cast<InputPixelType>(m_H)));
+    return m_Alpha;
 }
 
 template< typename TInputImage, typename TOutputImage >
 void AnisotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
 ::TimeStepTestStability()
 {
-    if ( m_TimeStep >  ( 1.0 / pow((double)(2.0), static_cast< double >( InputImageDimension ) +1) ))
+    if ( m_TimeStep >  ( 1.0 / pow(2.0, static_cast< double >( InputImageDimension ) +1) ))
     {
         itkWarningMacro( << "Anisotropic diffusion unstable time step: "
                          << m_TimeStep << endl
                          << "Stable time step for this image must be smaller than "
-                         << 1.0 / pow((double)(2.0), static_cast< double >( InputImageDimension ) +1) );
+                         << 1.0 / pow( 2.0, static_cast< double >( InputImageDimension ) +1) );
     }
 }
 
 template< typename TInputImage, typename TOutputImage >
-double AnisotropicAnomalousDiffusionImageFilter<TInputImage, TOutputImage >
+float AnisotropicAnomalousDiffusionImageFilter<TInputImage, TOutputImage >
 ::GeneralizedDiffCurve()
 {
 
@@ -150,9 +210,9 @@ double AnisotropicAnomalousDiffusionImageFilter<TInputImage, TOutputImage >
     float alpha = (2.0 - m_Q)*(3.0 - m_Q);
     if (m_Q < 1.0) {
         //            d = 2*Math.pow(alpha, 2/(3-q))*Math.pow(Math.sqrt((1 - q) / Math.PI) * (gamma(1 + (1 / (1 - q))) / gamma(3 / 2 + (1 / (1 - q)))), ((2 - 2 * q) / (3 - q)));
-        d = m_GeneralizedDiffusion * exp((-1.0) * (pow((double)(m_Q - 1.0), (double)(2.0))) / 0.08);
+        d = m_GeneralizedDiffusion * exp((-1.0) * (pow(m_Q - 1.0, 2.0)) / 0.08);
     } else if (m_Q >= 1.0 && m_Q < 2.0) {
-        d = m_GeneralizedDiffusion * pow((double)(alpha), (double)(2.0 / (3.0 - m_Q))) * pow((double)(sqrt((m_Q - 1.0) / M_PI) * (tgamma(1.0 / (m_Q - 1.0)) / tgamma((1.0 / (m_Q - 1.0)) - 1.0 / 2.0))), (double)(((2.0 - 2.0 * m_Q) / (3.0 - m_Q))));
+        d = m_GeneralizedDiffusion * pow(alpha, 2.0 / (3.0 - m_Q)) * pow(sqrt((m_Q - 1.0) / M_PI) * (tgamma(1.0 / (m_Q - 1.0)) / tgamma((1.0 / (m_Q - 1.0)) - 1.0 / 2.0)), ((2.0 - 2.0 * m_Q) / (3.0 - m_Q)));
         //            d = percentD * Math.exp((-1) * (Math.pow(q - 1.0, 2.0)) / 0.4);
     } else if (m_Q == 1.0) {
         d = m_GeneralizedDiffusion;
