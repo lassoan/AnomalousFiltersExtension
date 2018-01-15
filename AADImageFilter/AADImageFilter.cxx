@@ -70,6 +70,8 @@ int DoIt( int argc, char * argv[], T )
         typedef itk::AutomaticConductanceImageCalculator<InputImageType>   ConductanceOptimizationCalculator;
         typename ConductanceOptimizationCalculator::Pointer optKappa = ConductanceOptimizationCalculator::New();
         optKappa->SetImage(input_rescaler->GetOutput());
+
+        //Selecting the optimization function
         if (optFunction=="Canny") {
             optKappa->SetOptimizationMethod(ConductanceOptimizationCalculator::CANNY);
             std::cout<<"Canny method - Conductance = ";
@@ -90,6 +92,15 @@ int DoIt( int argc, char * argv[], T )
     }else{
         std::cout<<"Manual conductance adjustment - Conductance = "<<conductance<<std::endl;
         filter->SetConductance(conductance);
+    }
+
+    //Selecting the edge function
+    if (edgeFunction=="Exponential") {
+        filter->SetEdgeFunction(FilterType::EXPONENTIAL);
+    }else if (edgeFunction=="Fractional") {
+        filter->SetEdgeFunction(FilterType::FRACTIONAL);
+    }else if (edgeFunction=="Logistic") {
+        filter->SetEdgeFunction(FilterType::LOGISTIC);
     }
     filter->SetIterations(iterations);
     filter->SetTimeStep(timeStep);

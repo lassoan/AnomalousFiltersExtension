@@ -26,9 +26,52 @@
       <description><![CDATA[Output Volume]]></description>
     </image>
   </parameters>
-  <parameters>
-    <label>Diffusion Parameters</label>
-    <description><![CDATA[Diffusion filter parameters]]></description>
+<parameters>
+    <label>Diffusion Parameters - First Level</label>
+    <description><![CDATA[Defines the number of iterations, time step and anomalous parameter (q value)]]></description>
+    <integer>
+      <name>iterations</name>
+      <longflag>--iterations</longflag>
+      <flag>i</flag>
+      <label>Number of Iterations</label>
+      <description><![CDATA[A integer value that defines the number of iterations.]]></description>
+      <default>1</default>
+      <constraints>
+        <minimum>1</minimum>
+        <maximum>100</maximum>
+        <step>1</step>
+      </constraints>
+    </integer>
+    <double>
+      <name>q</name>
+      <longflag>--anomalousparameter</longflag>
+      <flag>q</flag>
+      <label>Anomalous Parameter</label>
+      <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
+      <default>1.0</default>
+      <constraints>
+        <minimum>0.01</minimum>
+        <maximum>1.99</maximum>
+        <step>0.01</step>
+      </constraints>
+    </double>
+    <double>
+      <name>timeStep</name>
+      <longflag>--timestep</longflag>
+      <flag>t</flag>
+      <label>Time Step</label>
+      <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
+      <default>0.0625</default>
+      <constraints>
+        <minimum>0.0015</minimum>
+        <maximum>0.0625</maximum>
+        <step>0.0001</step>
+      </constraints>
+    </double>
+</parameters>
+<parameters>
+    <label>Diffusion Parameters - Second Level</label>
+    <description><![CDATA[Defines the conductance]]></description>
     <float>
       <name>conductance</name>
       <longflag>--conductance</longflag>
@@ -69,43 +112,31 @@
       <description><![CDATA[A float value for coductance regularization factor.]]></description>
       <default>2.0</default>
     </float>
-    <integer>
-      <name>iterations</name>
-      <longflag>--iterations</longflag>
-      <flag>i</flag>
-      <label>Number of Iterations</label>
-      <description><![CDATA[A integer value that defines the number of iterations.]]></description>
-      <default>1</default>
-      <constraints>
-        <minimum>1</minimum>
-        <maximum>100</maximum>
-        <step>1</step>
-      </constraints>
-    </integer>
+</parameters>
+<parameters> 
+    <label>Diffusion Parameters - Third Level</label> 
+    <description><![CDATA[Defines the edge function used to preserve image global details.]]></description> 
+    <string-enumeration> 
+      <name>edgeFunction</name> 
+      <longflag>--edgeFunction</longflag> 
+      <flag>e</flag> 
+      <description><![CDATA[A set of function for anisotropic smoothing modulation. The type of edge function chosen here depends on the edge characteristics of the image, which sharp good quality images can have more abrupt edge functions and less detailed edge quality images can use more soft decay.]]></description> 
+      <label>Edge Function</label> 
+      <default>Exponential</default> 
+      <element>Exponential</element> 
+      <element>Fractional</element> 
+      <element>Logistic</element> 
+    </string-enumeration> 
     <double>
-      <name>timeStep</name>
-      <longflag>--timestep</longflag>
-      <flag>t</flag>
-      <label>Time Step</label>
-      <description><![CDATA[A double value that regulates the numerical stability of the algorithm. It is safe to maintain the upper limit with the formulation given by Anisotropic Diffusion algorithm (See GradientAnisotropiDiffusionImageFilter in ITK documentation).]]></description>
-      <default>0.0625</default>
+      <name>homoLevel</name>
+      <longflag>--homogeneity</longflag>
+      <label>Homogeneity Level</label>
+      <description><![CDATA[A double value that regulates how much the logistic curve will smooth the non-edge structures in the image. Value close to 1.0 will strongly smooth those homogenous ares in the image, which, on the other hand, values close to 0.5 will flat the contrast of the image (i.e. vanishs the image contrast levels)]]></description>
+      <default>0.98</default>
       <constraints>
-        <minimum>0.0015</minimum>
-        <maximum>0.0625</maximum>
+        <minimum>0.5</minimum>
+        <maximum>0.999</maximum>
         <step>0.001</step>
-      </constraints>
-    </double>
-    <double>
-      <name>q</name>
-      <longflag>--anomalousparameter</longflag>
-      <flag>q</flag>
-      <label>Anomalous Parameter</label>
-      <description><![CDATA[A double value that defines the q-Gaussian probability distribution function which is convoluated in each neighborhood in the image.]]></description>
-      <default>1.0</default>
-      <constraints>
-        <minimum>0.01</minimum>
-        <maximum>1.99</maximum>
-        <step>0.01</step>
       </constraints>
     </double>
 </parameters>
