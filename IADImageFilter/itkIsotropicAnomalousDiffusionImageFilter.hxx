@@ -25,6 +25,7 @@ IsotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
     m_GeneralizedDiffusion = 1.0;
     m_Iterations = 1;
     m_TimeStep = (1.0 / pow((double)(2.0),static_cast<double>(InputImageDimension)+1));
+    this->DynamicMultiThreadingOff();
 }
 
 template< typename TInputImage, typename TOutputImage >

@@ -218,6 +218,7 @@ void
 AutomaticConductanceImageCalculator< TInputImage >
 ::PrintSelf(std::ostream & os, Indent indent) const
 {
+  /*
     Superclass::PrintSelf(os, indent);
 
       os << indent << "Kappa: "
@@ -227,6 +228,7 @@ AutomaticConductanceImageCalculator< TInputImage >
     os << indent << "Region: " << std::endl;
     m_Region.Print( os, indent.GetNextIndent() );
     os << indent << "Region set by User: " << m_RegionSetByUser << std::endl;
+    */
 }
 } // end namespace itk
 

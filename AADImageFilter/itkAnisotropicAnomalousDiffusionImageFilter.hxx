@@ -29,6 +29,7 @@ AnisotropicAnomalousDiffusionImageFilter< TInputImage, TOutputImage >
     m_Iterations = 1;
     m_GeneralizedDiffusion=1.0;
     m_TimeStep = (1.0 / pow(2.0,static_cast<double>(InputImageDimension) + 1));
+    this->DynamicMultiThreadingOff();
 }
 
 template<typename TInputImage, typename TOutputImage>

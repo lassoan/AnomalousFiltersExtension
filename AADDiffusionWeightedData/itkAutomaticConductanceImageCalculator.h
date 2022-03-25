@@ -105,7 +105,7 @@ public:
 protected:
     AutomaticConductanceImageCalculator();
     virtual ~AutomaticConductanceImageCalculator() {}
-    virtual void PrintSelf(std::ostream & os, Indent indent) const ITK_OVERRIDE;
+    void PrintSelf(std::ostream & os, Indent indent) const override;
 
 private:
     AutomaticConductanceImageCalculator(const Self &) ITK_DELETE_FUNCTION;
